@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مسلسلات رمضان 2026</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <!-- HLS.js for m3u8 streams -->
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest/dist/hls.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box
+        }
+
+        :root {
+            --gold: #d4a534;
+            --gold2: #f5c842;
+            --dark: #07070f;
+            --dark2: #0d0d1e;
+            --card: #111127;
+            --border: rgba(212, 165, 52, .15);
+            --r: 14px;
+            --t: .3s cubic-bezier(.4, 0, .2, 1)
+        }
+
+        body {
+            background: var(--dark);
+            color: #fff;
+            font-family: 'Cairo', sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden
+        }
+
+        ::-webkit-scrollbar {
+            width: 5px
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--dark)
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(212, 165, 52, .3);
+            border-radius: 3px
+        }
+
+        /* ── STARS ── */
+        #stars {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0
+        }
+
+        .star {
+            position: absolute;
+            background: #fff;
+            border-radius: 50%;
+            animation: twinkle var(--d, 3s) ease-in-out infinite;
+            opacity: 0
+        }
+
+        @keyframes twinkle {
+
+            0%,
+            100% {
+                opacity: 0
+            }
+
+            50% {
+                opacity: var(--o, .6)
+            }
+        }
+
+        /* ── HERO ── */
+        .hero {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            padding: 55px 40px 38px;
+            background: linear-gradient(180deg, rgba(212, 165, 52, .07) 0%, transparent 100%);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse 80% 60% at 50% -10%, rgba(212, 165, 52, .13), transparent);
+            pointer-events: none
+        }
+
+        .moon {
+            font-size: 64px;
+            animation: float 4s ease-in-out infinite;
+            display: inline-block
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0)
+            }
+
+            50% {
+                transform: translateY(-12px)
+            }
+        }
+
+        .hero h1 {
+            font-size: clamp(2rem, 5vw, 3.4rem);
+            font-weight: 900;
+            background: linear-gradient(135deg, #f5c842, #d4a534, #f5c842);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin: .4rem 0 .25rem;
+            letter-spacing: -.5px
+        }
+
+        .hero p {
+            color: rgba(255, 255, 255, .45);
+            font-size: .95rem;
+            margin-bottom: 18px
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(212, 165, 52, .1);
+            border: 1px solid var(--border);
+            border-radius: 50px;
+            padding: 6px 20px;
+            font-size: .85rem;
+            color: var(--gold2)
+        }
+
+        /* ── CONTROLS ── */
+        .controls {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background: rgba(7, 7, 15, .88);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            padding: 13px 40px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .search-wrap {
+            position: relative;
+            flex: 1;
+            min-width: 180px;
+            max-width: 360px
+        }
+
+        .search-wrap input {
+            width: 100%;
+            background: rgba(255, 255, 255, .05);
+            border: 1px solid var(--border);
+            border-radius: 50px;
+            padding: 10px 20px 10px 42px;
+            color: #fff;
+            font-family: 'Cairo', sans-serif;
+            font-size: .9rem;
+            transition: var(--t);
+            outline: none
+        }
+
+        .search-wrap input:focus {
+            border-color: var(--gold);
+            background: rgba(212, 165, 52, .07)
+        }
+
+        .search-wrap .si {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            opacity: .4
+        }
+
+        .count-pill {
+            margin-right: auto;
+            background: rgba(212, 165, 52, .08);
+            border: 1px solid var(--border);
+            border-radius: 50px;
+            padding: 6px 16px;
+            font-size: .82rem;
+            color: var(--gold2);
+            white-space: nowrap
+        }
+
+        .updated {
+            color: rgba(255, 255, 255, .25);
+            font-size: .72rem;
+            white-space: nowrap
+        }
+
+        /* ── GRID ── */
+        .grid-wrap {
+            position: relative;
+            z-index: 1;
+            padding: 34px 40px 60px;
+            max-width: 1600px;
+            margin: 0 auto
+        }
+
+        .section-label {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--gold);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 22px
+        }
+
+        .section-label::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border)
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+            gap: 20px
+        }
+
+        /* ── CARD ── */
+        .card {
+            position: relative;
+            border-radius: var(--r);
+            overflow: hidden;
+            background: var(--card);
+            border: 1px solid var(--border);
+            cursor: pointer;
+            transition: transform .3s, box-shadow .3s, border-color .3s;
+            animation: pop .45s ease-out backwards
+        }
+
+        @keyframes pop {
+            from {
+                opacity: 0;
+                transform: translateY(18px) scale(.96)
+            }
+
+            to {
+                opacity: 1;
+                transform: none
+            }
+        }
+
+        .card:hover {
+            transform: translateY(-10px) scale(1.03);
+            border-color: rgba(212, 165, 52, .5);
+            box-shadow: 0 24px 50px rgba(0, 0, 0, .5), 0 0 40px rgba(212, 165, 52, .1)
+        }
+
+        .card-img {
+            position: relative;
+            aspect-ratio: 2/3;
+            overflow: hidden;
+            background: #0b0b1c
+        }
+
+        .card-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform .5s;
+            display: block
+        }
+
+        .card:hover .card-img img {
+            transform: scale(1.1)
+        }
+
+        .card-img::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to top, rgba(7, 7, 15, .95) 0%, rgba(7, 7, 15, .25) 50%, transparent 100%)
+        }
+
+        .badge {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 2;
+            background: var(--gold);
+            color: #07070f;
+            font-size: .63rem;
+            font-weight: 900;
+            padding: 3px 9px;
+            border-radius: 6px;
+            letter-spacing: .5px
+        }
+
+        .play-btn {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            z-index: 3;
+            transform: translate(-50%, -50%) scale(0);
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: rgba(212, 165, 52, .92);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform .3s, box-shadow .3s;
+            box-shadow: 0 0 40px rgba(212, 165, 52, .4)
+        }
+
+        .play-btn svg {
+            width: 26px;
+            height: 26px;
+            fill: #07070f;
+            margin-right: -3px
+        }
+
+        .card:hover .play-btn {
+            transform: translate(-50%, -50%) scale(1)
+        }
+
+        .card-meta {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 2;
+            padding: 14px 12px 12px
+        }
+
+        .card-title {
+            font-size: .88rem;
+            font-weight: 700;
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden
+        }
+
+        /* ── STATE ── */
+        .state {
+            text-align: center;
+            padding: 100px 20px;
+            color: rgba(255, 255, 255, .35)
+        }
+
+        .spinner {
+            width: 48px;
+            height: 48px;
+            border: 3px solid var(--border);
+            border-top-color: var(--gold);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg)
+            }
+        }
+
+        /* ═══════════════════════════════════
+   PLAYER MODAL
+═══════════════════════════════════ */
+        .backdrop {
+            position: fixed;
+            inset: 0;
+            z-index: 100;
+            background: rgba(0, 0, 0, .95);
+            backdrop-filter: blur(14px);
+            display: flex;
+            flex-direction: column;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity .3s
+        }
+
+        .backdrop.open {
+            opacity: 1;
+            pointer-events: all
+        }
+
+        /* TOP BAR */
+        .player-top {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px 20px;
+            border-bottom: 1px solid var(--border);
+            background: var(--dark2);
+            flex-shrink: 0
+        }
+
+        .ptop-poster {
+            width: 46px;
+            height: 68px;
+            border-radius: 8px;
+            object-fit: cover;
+            flex-shrink: 0
+        }
+
+        .ptop-info {
+            flex: 1;
+            min-width: 0
+        }
+
+        .ptop-title {
+            font-size: 1.15rem;
+            font-weight: 900
+        }
+
+        .ptop-sub {
+            font-size: .78rem;
+            color: var(--gold2);
+            margin-top: 3px
+        }
+
+        .ep-label {
+            background: rgba(212, 165, 52, .15);
+            border: 1px solid var(--border);
+            border-radius: 50px;
+            padding: 2px 10px;
+            font-size: .72rem;
+            color: var(--gold)
+        }
+
+        .close-btn {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            background: rgba(255, 255, 255, .07);
+            border: 1px solid var(--border);
+            color: #fff;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: background .2s;
+            display: flex;
+            align-items: center;
+            justify-content: center
+        }
+
+        .close-btn:hover {
+            background: rgba(220, 50, 50, .4)
+        }
+
+        /* MAIN BODY */
+        .player-body {
+            flex: 1;
+            display: flex;
+            min-height: 0;
+            overflow: hidden
+        }
+
+        /* SIDEBAR */
+        .ep-sidebar {
+            width: 260px;
+            flex-shrink: 0;
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            background: var(--dark2)
+        }
+
+        .ep-sidebar-title {
+            padding: 14px 16px;
+            font-size: .82rem;
+            font-weight: 700;
+            color: rgba(255, 255, 255, .5);
+            border-bottom: 1px solid var(--border);
+            text-transform: uppercase
+        }
+
+        .ep-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 8px 0
+        }
+
+        .ep-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 16px;
+            cursor: pointer;
+            transition: background .15s;
+            border-bottom: 1px solid rgba(255, 255, 255, .03)
+        }
+
+        .ep-item:hover {
+            background: rgba(212, 165, 52, .06)
+        }
+
+        .ep-item.active {
+            background: rgba(212, 165, 52, .12);
+            border-right: 3px solid var(--gold)
+        }
+
+        .ep-num {
+            min-width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, .06);
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: .78rem;
+            font-weight: 700;
+            color: var(--gold2);
+            flex-shrink: 0
+        }
+
+        .ep-item.active .ep-num {
+            background: var(--gold);
+            color: #07070f;
+            border-color: var(--gold)
+        }
+
+        .ep-name {
+            font-size: .82rem;
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden
+        }
+
+        .ep-loading {
+            padding: 30px;
+            text-align: center;
+            color: rgba(255, 255, 255, .3);
+            font-size: .85rem
+        }
+
+        /* VIDEO PANEL */
+        .video-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-width: 0
+        }
+
+        .video-wrap {
+            position: relative;
+            background: #000;
+            flex: 1;
+            min-height: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center
+        }
+
+        video {
+            width: 100%;
+            height: 100%;
+            max-height: 100%;
+            display: block;
+            background: #000
+        }
+
+        .vid-overlay {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 18px;
+            background: rgba(7, 7, 15, .9);
+            transition: opacity .3s;
+            z-index: 2
+        }
+
+        .vid-overlay.hidden {
+            opacity: 0;
+            pointer-events: none
+        }
+
+        .vid-spinner {
+            width: 52px;
+            height: 52px;
+            border: 3px solid var(--border);
+            border-top-color: var(--gold);
+            border-radius: 50%;
+            animation: spin 1s linear infinite
+        }
+
+        .vid-msg {
+            color: rgba(255, 255, 255, .5);
+            font-size: .9rem;
+            text-align: center;
+            max-width: 280px;
+            line-height: 1.6
+        }
+
+        .vid-err {
+            color: #ff6b6b;
+            font-size: .85rem;
+            text-align: center;
+            max-width: 300px;
+            line-height: 1.6
+        }
+
+        .btn-ext {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 8px;
+            background: linear-gradient(135deg, var(--gold2), var(--gold));
+            color: #07070f;
+            font-family: 'Cairo', sans-serif;
+            font-size: .9rem;
+            font-weight: 900;
+            padding: 12px 26px;
+            border-radius: 50px;
+            border: none;
+            cursor: pointer;
+            text-decoration: none;
+            transition: transform .2s
+        }
+
+        .btn-ext:hover {
+            transform: scale(1.04)
+        }
+
+        footer {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            padding: 24px;
+            border-top: 1px solid var(--border);
+            color: rgba(255, 255, 255, .2);
+            font-size: .78rem
+        }
+
+        footer a {
+            color: var(--gold);
+            text-decoration: none
+        }
+
+        /* RESPONSIVE */
+        @media(max-width:768px) {
+            .hero {
+                padding: 40px 18px 28px
+            }
+
+            .controls {
+                padding: 12px 16px
+            }
+
+            .grid-wrap {
+                padding: 22px 16px 40px
+            }
+
+            .grid {
+                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+                gap: 12px
+            }
+
+            .ep-sidebar {
+                width: 200px
+            }
+
+            .player-top {
+                padding: 10px 14px
+            }
+        }
+
+        @media(max-width:600px) {
+            .grid {
+                grid-template-columns: repeat(2, 1fr)
+            }
+
+            .player-body {
+                flex-direction: column
+            }
+
+            .ep-sidebar {
+                width: 100%;
+                height: 180px;
+                border-right: none;
+                border-top: 1px solid var(--border)
+            }
+
+            .ep-list {
+                flex-direction: row;
+                display: flex;
+                overflow-x: auto;
+                overflow-y: hidden;
+                padding: 8px
+            }
+
+            .ep-item {
+                flex-shrink: 0;
+                gap: 6px
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="stars"></div>
+
+    <!-- HERO -->
+    <header class="hero">
+        <span class="moon">🌙</span>
+        <h1>مسلسلات رمضان 2026</h1>
+        <p>جميع المسلسلات العربية · شاهد الحلقات مباشرة</p>
+        <div class="hero-badge"><span>📺</span><span id="heroCount">جاري التحميل...</span></div>
+    </header>
+
+    <!-- CONTROLS -->
+    <div class="controls">
+        <div class="search-wrap">
+            <span class="si">🔍</span>
+            <input id="searchInput" type="text" placeholder="ابحث عن مسلسل...">
+        </div>
+        <div class="count-pill" id="countPill"></div>
+        <span class="updated" id="updatedAt"></span>
+    </div>
+
+    <!-- GRID -->
+    <div class="grid-wrap">
+        <div class="section-label">🌙 مسلسلات رمضان العربي 2026</div>
+        <div class="state" id="loadState">
+            <div class="spinner"></div>
+            <p>جاري التحميل...</p>
+        </div>
+        <div class="grid" id="grid"></div>
+        <div class="state" id="emptyState" style="display:none">
+            <div style="font-size:3rem">🔍</div>
+            <p>لا توجد نتائج</p>
+        </div>
+    </div>
+
+    <footer>
+        <p>🌙 رمضان كريم 2026 · المصدر: <a href="https://bx.alooytv6.xyz" target="_blank">alooytv</a></p>
+    </footer>
+
+    <!-- PLAYER MODAL -->
+    <div class="backdrop" id="backdrop">
+        <!-- Top bar -->
+        <div class="player-top">
+            <img class="ptop-poster" id="mPoster" src="" alt="">
+            <div class="ptop-info">
+                <div class="ptop-title" id="mTitle"></div>
+                <div class="ptop-sub">
+                    <span>🎬 عربي</span> · <span>HD</span> · <span class="ep-label" id="mEpLabel">الحلقة 1</span>
+                </div>
+            </div>
+            <button class="close-btn" id="closeBtn">✕</button>
+        </div>
+
+        <!-- Body -->
+        <div class="player-body">
+            <!-- Episode sidebar -->
+            <div class="ep-sidebar">
+                <div class="ep-sidebar-title">الحلقات</div>
+                <div class="ep-list" id="epList">
+                    <div class="ep-loading" id="epLoading">
+                        <div class="spinner" style="width:32px;height:32px;border-width:2px;margin-bottom:10px"></div>
+                        جاري تحميل الحلقات...
+                    </div>
+                </div>
+            </div>
+
+            <!-- Video player -->
+            <div class="video-panel">
+                <div class="video-wrap" id="videoWrap">
+                    <video id="vid" controls playsinline preload="metadata"></video>
+                    <div class="vid-overlay" id="vidOverlay">
+                        <div class="vid-spinner" id="vidSpinner"></div>
+                        <div class="vid-msg" id="vidMsg">جاري تحميل الفيديو...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API = ``; // empty = same origin (works locally & on Railway)
+        let allSeries = [], filtered = [], currentSlug = '', currentEpUrl = '', hls = null;
+
+        // ── Stars ──────────────────────────────────────────────────────────────
+        (function () {
+            const c = document.getElementById('stars');
+            for (let i = 0; i < 90; i++) {
+                const s = document.createElement('div'); s.className = 'star';
+                s.style.cssText = `left:${Math.random() * 100}%;top:${Math.random() * 100}%;
+      width:${1 + Math.random() * 2}px;height:${1 + Math.random() * 2}px;
+      --d:${2 + Math.random() * 5}s;--o:${.2 + Math.random() * .8};
+      animation-delay:${Math.random() * 6}s`;
+                c.appendChild(s);
+            }
+        })();
+
+        // ── Data ───────────────────────────────────────────────────────────────
+        async function loadData() {
+            try {
+                const r = await fetch(API + '/api/data?t=' + Date.now());
+                if (!r.ok) throw Error('no data');
+                const d = await r.json();
+                allSeries = d.series || [];
+                document.getElementById('heroCount').textContent = d.total + ' مسلسل عربي';
+                document.getElementById('countPill').textContent = d.total + ' مسلسل';
+                if (d.last_updated) document.getElementById('updatedAt').textContent = 'آخر تحديث: ' + d.last_updated;
+                document.getElementById('loadState').style.display = 'none';
+                renderGrid();
+            } catch {
+                document.getElementById('loadState').innerHTML = `
+      <div style="font-size:3rem">⚠️</div>
+      <p>شغّل: <code>python server.py</code></p>`;
+            }
+        }
+
+        // ── Grid ───────────────────────────────────────────────────────────────
+        function renderGrid() {
+            const g = document.getElementById('grid');
+            const e = document.getElementById('emptyState');
+            const q = document.getElementById('searchInput').value.trim().toLowerCase();
+            filtered = q ? allSeries.filter(s => s.title.includes(q) || s.title.toLowerCase().includes(q)) : allSeries;
+            if (!filtered.length) { g.innerHTML = ''; e.style.display = 'block'; return }
+            e.style.display = 'none';
+            g.innerHTML = filtered.map((s, i) => `
+    <div class="card" style="animation-delay:${Math.min(i * .04, 1.5)}s" onclick="openSeries(${i})">
+      <div class="card-img">
+        ${s.image ? `<img src="${s.image}" alt="${s.title}" loading="lazy" onerror="this.style.display='none'">` : ''}
+        <span class="badge">HD</span>
+        <div class="play-btn"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>
+        <div class="card-meta"><div class="card-title">${s.title}</div></div>
+      </div>
+    </div>`).join('');
+        }
+        let st;
+        document.getElementById('searchInput').addEventListener('input', () => { clearTimeout(st); st = setTimeout(renderGrid, 180) });
+
+        // ── Open Series ────────────────────────────────────────────────────────
+        async function openSeries(idx) {
+            const s = filtered[idx]; if (!s) return;
+            currentSlug = s.slug || ''; currentEpUrl = '';
+
+            document.getElementById('mTitle').textContent = s.title;
+            document.getElementById('mPoster').src = s.image || '';
+            document.getElementById('mEpLabel').textContent = 'جاري التحميل...';
+            document.getElementById('epList').innerHTML =
+                '<div class="ep-loading"><div class="spinner" style="width:32px;height:32px;border-width:2px;margin-bottom:10px"></div>جاري جلب الحلقات...</div>';
+
+            showOverlay('جاري تحميل الحلقات...', 'spin');
+            stopHls();
+
+            document.getElementById('backdrop').classList.add('open');
+            document.body.style.overflow = 'hidden';
+
+            // Fetch episode list
+            try {
+                const r = await fetch(`${API}/api/episodes?slug=${currentSlug}`);
+                const d = await r.json();
+                const eps = d.episodes || [];
+                if (eps.length === 0) throw Error('no episodes');
+                renderEpisodes(eps);
+                // Auto-play first
+                playEpisode(eps[0].url, eps[0].title, 1, eps.length);
+            } catch (err) {
+                document.getElementById('epList').innerHTML =
+                    `<div class="ep-loading" style="color:rgba(255,100,100,.7)">تعذّر تحميل الحلقات<br><small>${err.message}</small></div>`;
+                // Fallback: play the series page directly
+                playEpisode(s.link, s.title, 1, 1);
+            }
+        }
+
+        function renderEpisodes(eps) {
+            const list = document.getElementById('epList');
+            list.innerHTML = eps.map((e, i) => `
+    <div class="ep-item" id="epItem-${i}" onclick="playEpisode('${e.url.replace(/'/g, "\\'")}','${e.title.replace(/'/g, "\\'")}',${i + 1},${eps.length})">
+      <div class="ep-num">${i + 1}</div>
+      <div class="ep-name">${e.title || 'الحلقة ' + (i + 1)}</div>
+    </div>`).join('');
+        }
+
+        // ── Play Episode ────────────────────────────────────────────────────────
+        async function playEpisode(epUrl, epTitle, epNum, total) {
+            if (currentEpUrl === epUrl) return;
+            currentEpUrl = epUrl;
+
+            document.getElementById('mEpLabel').textContent = `الحلقة ${epNum} / ${total}`;
+            // highlight active ep
+            document.querySelectorAll('.ep-item').forEach(el => el.classList.remove('active'));
+            const active = document.getElementById(`epItem-${epNum - 1}`);
+            if (active) { active.classList.add('active'); active.scrollIntoView({ behavior: 'smooth', block: 'nearest' }) }
+
+            showOverlay('جاري استخراج الفيديو...', 'spin');
+            stopHls();
+
+            try {
+                const r = await fetch(`${API}/api/stream?url=${encodeURIComponent(epUrl)}`);
+                const d = await r.json();
+                if (!d.url) throw Error('no video url returned');
+                startPlayback(d.url, epUrl);
+            } catch (err) {
+                showOverlay(`تعذّر تحميل الحلقة\n${err.message}`, 'err', epUrl);
+            }
+        }
+
+        function startPlayback(videoUrl, fallbackUrl) {
+            const vid = document.getElementById('vid');
+            stopHls();
+
+            const isHls = videoUrl.includes('.m3u8');
+            if (isHls && Hls.isSupported()) {
+                hls = new Hls({ maxBufferLength: 30, enableWorker: true });
+                hls.loadSource(videoUrl);
+                hls.attachMedia(vid);
+                hls.on(Hls.Events.MANIFEST_PARSED, () => { hideOverlay(); vid.play().catch(() => { }) });
+                hls.on(Hls.Events.ERROR, (_, d) => { if (d.fatal) showOverlay('خطأ في تحميل الفيديو', 'err', fallbackUrl) });
+            } else if (isHls && vid.canPlayType('application/vnd.apple.mpegurl')) {
+                vid.src = videoUrl;
+                vid.addEventListener('loadedmetadata', () => { hideOverlay(); vid.play() }, { once: true });
+            } else {
+                vid.src = videoUrl;
+                vid.addEventListener('canplay', () => { hideOverlay(); vid.play() }, { once: true });
+                vid.addEventListener('error', () => showOverlay('تعذّر تشغيل الفيديو', 'err', fallbackUrl), { once: true });
+            }
+        }
+
+        function stopHls() {
+            if (hls) { hls.destroy(); hls = null }
+            const v = document.getElementById('vid');
+            v.pause(); v.src = ''; v.load();
+        }
+
+        // ── Overlay ─────────────────────────────────────────────────────────────
+        function showOverlay(msg, type, fallback) {
+            const o = document.getElementById('vidOverlay');
+            const sp = document.getElementById('vidSpinner');
+            const m = document.getElementById('vidMsg');
+            o.classList.remove('hidden');
+            sp.style.display = type === 'spin' ? 'block' : 'none';
+            if (type === 'err') {
+                m.innerHTML = `<span class="vid-err">⚠️ ${msg}</span>
+      ${fallback ? `<a href="${fallback}" target="_blank" class="btn-ext">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="#07070f"><path d="M8 5v14l11-7z"/></svg>
+        افتح في الموقع</a>`: ''}`;
+            } else {
+                m.innerHTML = `<span class="vid-msg">${msg}</span>`;
+            }
+        }
+        function hideOverlay() { document.getElementById('vidOverlay').classList.add('hidden') }
+
+        // ── Close ────────────────────────────────────────────────────────────────
+        function closePlayer() {
+            document.getElementById('backdrop').classList.remove('open');
+            document.body.style.overflow = '';
+            stopHls();
+            setTimeout(() => { currentEpUrl = ''; hideOverlay(); }, 350);
+        }
+        document.getElementById('closeBtn').onclick = closePlayer;
+        document.getElementById('backdrop').addEventListener('click', e => { if (e.target === e.currentTarget) closePlayer() });
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') closePlayer() });
+
+        // ── Init ─────────────────────────────────────────────────────────────────
+        loadData();
+        setInterval(loadData, 5 * 60 * 1000);
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.env
+*.log
+test_*.py
+find_eps.py
+deep_ep.py
+check_missing.py
+check_quality.py
+*_out.txt

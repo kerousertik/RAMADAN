@@ -1,0 +1,286 @@
+"""
+Ramadan 2026 - Production Server
+Works locally & on Railway/Render/Fly.io
+"""
+
+import json, os, sys, re, random, time, threading
+import http.server, socketserver, urllib.parse, requests
+from bs4 import BeautifulSoup
+from urllib.parse import urljoin
+from datetime import datetime
+
+BASE = "https://bx.alooytv6.xyz"
+PORT = int(os.environ.get("PORT", 9002))          # Railway injects PORT env var
+DATA_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data.json")
+
+KNOWN_SERIES = [
+    ("بنت النعمان",                      "bint-al-noaman"),
+    ("الخروج إلى البئر",                 "al-khuroog-ila-al-ber"),
+    ("ثعالب الصحراء",                    "thaealib-al-sahara"),
+    ("سجون الشيطان",                     "sojun-alshaytan"),
+    ("عمارة السعادة",                    "omaret-el-saada"),
+    ("بدل تالف",                         "badal-talef"),
+    ("أنا وهي وهيا",                     "ana-wa-heya-wa-haya"),
+    ("رامز ليفل الوحش",                  "ramez-level-el-wahsh"),
+    ("روج أسود",                         "rouge-eswed"),
+    ("السرايا الصفرا",                   "el-saraya-el-safra"),
+    ("شمس الأصيل",                      "shams-el-aseel"),
+    ("يا أنا يا هي ج2",                  "ya-ana-ya-heya-2"),
+    ("اليتيم",                          "al-yateem"),
+    ("السوق الحرة",                     "al-souq-al-hurra"),
+    ("مناعة",                           "mannaa"),
+    ("لوبي الغرام",                      "lubby-al-gharam"),
+    ("عيلة الملك",                      "elet-al-malek"),
+    ("النويلاتي",                        "al-noelati"),
+    ("اسأل روحك",                       "esaal-rouhak"),
+    ("بنات العم ج2 : انتقام الموتى",     "banat-al-am-2"),
+    ("عرش الشيطان",                     "arsh-al-shaytan"),
+    ("المصيدة",                         "el-masyada"),
+    ("المداح ج6: أسطورة النهاية",        "al-maddah-6-ostorat-al-nehaya"),
+    ("قطر صغنطوط",                      "atr-soghantoot"),
+    ("عين سحرية",                       "ein-sehreya"),
+    ("كان يا مكان",                     "kan-ya-makan"),
+    ("حكاية نرجس",                      "hekayet-narges"),
+    ("أولاد الراعي",                     "awlad-el-raaey"),
+    ("حد أقصى",                         "had-aqsa"),
+    ("بيبو",                            "bibo"),
+    ("توابع",                           "tawabea"),
+    ("رأس الأفعى",                      "ras-al-afaa"),
+    ("درش",                             "darsh"),
+    ("بابا وماما جيران",                 "baba-w-mama-giran"),
+    ("اللون الأزرق",                    "al-lawn-al-azraq"),
+    ("سعادة المجنون",                   "saadaet-al-magnoun"),
+    ("صحاب الأرض",                     "sohab-al-ard"),
+    ("سوا سوا",                         "sawa-sawa"),
+    ("عرض وطلب",                        "aard-w-talab"),
+    ("على قد الحب",                     "ala-add-el-hob"),
+    ("كلهم بيحبوا مودي",                 "kollohom-beehebbo-moody"),
+    ("علي كلاي",                        "ali-clay"),
+    ("فخر الدلتا",                      "fakhr-el-delta"),
+    ("فرصة أخيرة",                      "forsa-akhira"),
+    ("فن الحرب",                        "fan-al-harb"),
+    ("اتنين غيرنا",                     "etnen-gherna"),
+    ("أب ولكن",                         "ab-wa-laken"),
+    ("مطبخ المدينة",                    "matbakh-al-madinah"),
+    ("مولانا",                          "mawlana"),
+    ("ن النسوة",                        "noon-el-neswa"),
+    ("إفراج",                           "efrag"),
+    ("الكينج",                          "el-king"),
+    ("وننسى اللي كان",                  "we-nensa-elly-kan"),
+    ("الست موناليزا",                   "el-set-monaliza"),
+    ("شرارة",                           "sharara"),
+    ("بخمس أرواح",                      "be-5-arwah"),
+    ("حمدية",                           "hamdiyya"),
+    ("حامض حلو ج7",                     "hammed-helw-7"),
+    ("بالحرام",                         "bil-haram"),
+    ("رحمة ج2",                         "rahma-2"),
+]
+
+UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/122.0 Safari/537.36"
+HEADERS = {"User-Agent": UA, "Accept-Encoding": "identity", "Referer": BASE}
+
+# In-memory cache so Railway's ephemeral disk isn't a problem
+_cache = {"series": [], "last_updated": ""}
+
+
+# ─── Fetch ────────────────────────────────────────────────────────────────────
+
+def fetch(url, retries=3):
+    for i in range(retries):
+        try:
+            r = requests.get(url, headers=HEADERS, timeout=20)
+            if r.status_code == 200:
+                return r.text
+            time.sleep(3)
+        except Exception:
+            if i < retries - 1:
+                time.sleep(5)
+    return ""
+
+
+# ─── Episode helpers ──────────────────────────────────────────────────────────
+
+def get_episodes(slug):
+    html = fetch(f"{BASE}/watch/{slug}.html")
+    if not html:
+        return []
+    soup = BeautifulSoup(html, "html.parser")
+    episodes, seen = [], set()
+    for a in soup.find_all("a", href=True):
+        h = a["href"]
+        if "key=" in h and slug in h:
+            full = h if h.startswith("http") else urljoin(BASE, h)
+            if full in seen:
+                continue
+            seen.add(full)
+            txt = a.get_text(strip=True)
+            m = re.search(r'(\d+)', txt)
+            ep_num = int(m.group(1)) if m else len(episodes) + 1
+            episodes.append({"num": ep_num, "url": full, "title": f"الحلقة {ep_num}"})
+    episodes.sort(key=lambda x: x["num"])
+    return episodes
+
+
+def get_video_url(episode_url):
+    html = fetch(episode_url)
+    if not html:
+        return None
+    soup = BeautifulSoup(html, "html.parser")
+    # Direct <source src="...">
+    for s in soup.find_all("source"):
+        src = s.get("src", "")
+        if src and (".mp4" in src or ".m3u8" in src):
+            return src if src.startswith("http") else urljoin(BASE, src)
+    # <video src="...">
+    for v in soup.find_all("video"):
+        src = v.get("src", "")
+        if src:
+            return src if src.startswith("http") else urljoin(BASE, src)
+    # JS file: "..."
+    for sc in soup.find_all("script"):
+        t = sc.string or ""
+        m = re.search(r'(?:file|src)["\s:]+["\']?(https?://[^"\'>\s]+\.(?:mp4|m3u8)[^"\'>\s]*)', t)
+        if m:
+            return m.group(1)
+    # Fallback: any .mp4 URL in HTML
+    m = re.search(r'(https?://[^\s"\'<>]+\.mp4[^\s"\'<>]*)', html)
+    return m.group(1) if m else None
+
+
+# ─── Scraper ──────────────────────────────────────────────────────────────────
+
+def scrape_all():
+    global _cache
+    # Load existing images from file or memory to avoid re-fetching
+    existing = {s["link"]: s for s in _cache.get("series", [])}
+    if not existing and os.path.exists(DATA_FILE):
+        with open(DATA_FILE, encoding="utf-8") as f:
+            try:
+                for s in json.load(f).get("series", []):
+                    existing[s["link"]] = s
+            except Exception:
+                pass
+
+    all_series = []
+    for title, slug in KNOWN_SERIES:
+        url = f"{BASE}/watch/{slug}.html"
+        cached = existing.get(url, {})
+        print(f"  ▶ {title}", flush=True)
+        image = cached.get("image", "")
+        if not image:
+            try:
+                html = fetch(url)
+                if html:
+                    soup = BeautifulSoup(html, "html.parser")
+                    og = soup.find("meta", property="og:image")
+                    if og:
+                        src = og.get("content", "")
+                        if src and "blank" not in src:
+                            image = src if src.startswith("http") else urljoin(BASE, src)
+                time.sleep(random.uniform(0.2, 0.5))
+            except Exception as e:
+                print(f"    [WARN] {e}", flush=True)
+        all_series.append({"title": title, "slug": slug, "link": url, "image": image})
+
+    ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    data = {"last_updated": ts, "total": len(all_series), "series": all_series}
+    _cache = data
+    # Save to disk if possible
+    try:
+        with open(DATA_FILE, "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+    except Exception:
+        pass
+    print(f"\n✅ Saved {len(all_series)} series", flush=True)
+    return data
+
+
+# ─── HTTP Handler ─────────────────────────────────────────────────────────────
+
+class Handler(http.server.SimpleHTTPRequestHandler):
+
+    def do_OPTIONS(self):
+        self.send_response(200)
+        self._cors()
+        self.end_headers()
+
+    def do_GET(self):
+        parsed = urllib.parse.urlparse(self.path)
+        params = urllib.parse.parse_qs(parsed.query)
+
+        if parsed.path == "/api/data":
+            body = json.dumps(_cache, ensure_ascii=False).encode("utf-8")
+            self.send_response(200)
+            self._cors()
+            self.send_header("Content-Type", "application/json; charset=utf-8")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+
+        elif parsed.path == "/api/episodes":
+            slug = (params.get("slug") or [""])[0]
+            if not slug:
+                return self._json(400, {"error": "no slug"})
+            print(f"  📋 Episodes: {slug}", flush=True)
+            eps = get_episodes(slug)
+            self._json(200, {"episodes": eps})
+
+        elif parsed.path == "/api/stream":
+            ep_url = urllib.parse.unquote((params.get("url") or [""])[0])
+            if not ep_url:
+                return self._json(400, {"error": "no url"})
+            print(f"  🎬 Stream: {ep_url[-60:]}", flush=True)
+            video_url = get_video_url(ep_url)
+            if video_url:
+                print(f"     ✅ {video_url[:80]}", flush=True)
+                self._json(200, {"url": video_url})
+            else:
+                self._json(500, {"error": "video not found"})
+        else:
+            super().do_GET()
+
+    def _cors(self):
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.send_header("Access-Control-Allow-Methods", "GET, OPTIONS")
+        self.send_header("Access-Control-Allow-Headers", "*")
+
+    def _json(self, code, data):
+        body = json.dumps(data, ensure_ascii=False).encode("utf-8")
+        self.send_response(code)
+        self._cors()
+        self.send_header("Content-Type", "application/json; charset=utf-8")
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
+
+    def log_message(self, fmt, *args):
+        pass
+
+
+def auto_update(mins=30):
+    while True:
+        time.sleep(mins * 60)
+        print(f"\n🔄 Auto-update...", flush=True)
+        try:
+            scrape_all()
+        except Exception as e:
+            print(f"[ERROR] {e}", flush=True)
+        print(f"⏰ Next in {mins} min", flush=True)
+
+
+class ReusableTCPServer(socketserver.TCPServer):
+    allow_reuse_address = True
+
+
+if __name__ == "__main__":
+    print(f"\n🌙 Ramadan 2026 — Port {PORT}", flush=True)
+    print("=" * 50, flush=True)
+    os.chdir(os.path.dirname(os.path.abspath(__file__)) or ".")
+    scrape_all()
+    threading.Thread(target=auto_update, args=(30,), daemon=True).start()
+    with ReusableTCPServer(("", PORT), Handler) as httpd:
+        print(f"\n🚀 http://localhost:{PORT}\n", flush=True)
+        try:
+            httpd.serve_forever()
+        except KeyboardInterrupt:
+            print("\n👋 Stopped.")
