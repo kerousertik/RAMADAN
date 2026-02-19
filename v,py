@@ -1,0 +1,97 @@
+
+import time
+import requests
+from bs4 import BeautifulSoup
+from urllib.parse import urljoin, urlparse
+
+BASE = "https://bx.alooytv6.xyz"
+
+HEADERS = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+                  "(KHTML, like Gecko) Chrome/122.0 Safari/537.36",
+    "Accept-Language": "ar,en-US;q=0.9,en;q=0.8",
+    "Referer": BASE + "/",
+}
+
+def fetch(url: str) -> str:
+    r = requests.get(url, headers=HEADERS, timeout=20)
+    r.raise_for_status()
+    return r.text
+
+def is_same_domain(url: str) -> bool:
+    return urlparse(url).netloc == urlparse(BASE).netloc
+
+def extract_genre_links(home_html: str) -> list[str]:
+    soup = BeautifulSoup(home_html, "html.parser")
+    links = set()
+    for a in soup.select("a[href]"):
+        href = a.get("href", "").strip()
+        if "/genre/" in href and href.endswith(".html"):
+            full = urljoin(BASE, href)
+            if is_same_domain(full):
+                links.add(full)
+    return sorted(links)
+
+def extract_items(page_html: str) -> list[tuple[str, str]]:
+    soup = BeautifulSoup(page_html, "html.parser")
+    items = []
+    # في صفحات الموقع العناوين بتظهر غالبًا داخل h3 وبجواها <a>
+    for h3 in soup.find_all("h3"):
+        a = h3.find("a", href=True)
+        if not a:
+            continue
+        name = a.get_text(strip=True)
+        link = urljoin(BASE, a["href"])
+        if name and is_same_domain(link):
+            items.append((name, link))
+    return items
+
+def extract_pagination_links(page_html: str) -> list[str]:
+    soup = BeautifulSoup(page_html, "html.parser")
+    pages = set()
+    for a in soup.select("a[href]"):
+        href = a.get("href", "").strip()
+        # صفحات الباجينيشن بتكون من نفس شكل /genre/<name>/50.html ... إلخ
+        if "/genre/" in href and href.endswith(".html"):
+            full = urljoin(BASE, href)
+            if is_same_domain(full):
+                pages.add(full)
+    return sorted(pages)
+
+def crawl_all_series():
+    home = fetch(BASE + "/")
+    genre_links = extract_genre_links(home)
+
+    all_series = {}  # link -> name
+    visited_pages = set()
+
+    for genre_url in genre_links:
+        queue = [genre_url]
+        while queue:
+            url = queue.pop(0)
+            if url in visited_pages:
+                continue
+            visited_pages.add(url)
+
+            try:
+                html = fetch(url)
+            except Exception as e:
+                print(f"[SKIP] {url} -> {e}")
+                continue
+
+            for name, link in extract_items(html):
+                all_series[link] = name
+
+            for nxt in extract_pagination_links(html):
+                if nxt not in visited_pages:
+                    queue.append(nxt)
+
+            time.sleep(0.3)  # تهدئة بسيطة
+
+    # طباعة النتيجة
+    print(f"Total titles found: {len(all_series)}\n")
+    for i, (link, name) in enumerate(sorted(all_series.items(), key=lambda x: x[1]), start=1):
+        print(f"{i:04d}. {name} -> {link}")
+
+if __name__ == "__main__":
+    crawl_all_series()

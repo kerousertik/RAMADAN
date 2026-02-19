@@ -1,0 +1,15 @@
+Total imgs: 101
+  [0] src=https://bx.alooytv6.xyz/uploads/system_logo/logo.png
+       data-src=
+       alt=logo | title=
+
+  [1] src=https://bx.alooytv6.xyz/uploads/default_image/blank_thumbnail.jpg
+       data-src=https://bx.alooytv6.xyz/uploads/video_thumb/1826.jpg
+Traceback (most recent call last):
+  File "D:\ramadan2026\test_scrape.py", line 18, in <module>
+    print(f"       alt={alt} | title={title}")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.13_3.13.3312.0_x64__qbz5n2kfra8p0\Lib\encodings\cp1252.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode characters in position 11-13: character maps to <undefined>

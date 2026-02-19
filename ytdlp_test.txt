@@ -1,0 +1,7 @@
+[generic] Extracting URL: https://bx.alooytv6.xyz/watch/badal-talef.html
+[generic] badal-talef: Downloading webpage
+WARNING: [generic] Falling back on generic information extractor
+[generic] badal-talef: Extracting information
+
+Title: ╪¿╪»┘ä ╪¬╪º┘ä┘ü (1)
+URL: https://vid1.0

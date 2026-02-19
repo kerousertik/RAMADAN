@@ -1,0 +1,27 @@
+Fetching genre page...
+Page title: Watch ramadan-arabi-2026 movies & TV-Series online
+Found 0 elements with class .film-poster
+Checking for other common card classes...
+Selector '.f-poster': found 0
+Selector '.poste': found 0
+Selector '.item': found 0
+Selector '.movie-poster': found 0
+Selector '.film-detail': found 0
+Selector '.flw-item': found 0
+
+Fetching detail page...
+No poster found with standard selectors. Listing all large images:
+Potential poster: https://bx.alooytv6.xyz/uploads/system_logo/logo.png
+Potential poster: https://bx.alooytv6.xyz/uploads/video_thumb/1808.jpg
+Potential poster: https://bx.alooytv6.xyz/uploads/default_image/blank_thumbnail.jpg
+Potential poster: https://bx.alooytv6.xyz/uploads/default_image/blank_thumbnail.jpg
+Potential poster: https://bx.alooytv6.xyz/uploads/default_image/blank_thumbnail.jpg
+Potential poster: https://bx.alooytv6.xyz/uploads/default_image/blank_thumbnail.jpg
+Potential poster: https://bx.alooytv6.xyz/uploads/default_image/blank_thumbnail.jpg
+Potential poster: https://bx.alooytv6.xyz/uploads/default_image/blank_thumbnail.jpg
+Potential poster: https://bx.alooytv6.xyz/uploads/default_image/blank_thumbnail.jpg
+Potential poster: https://bx.alooytv6.xyz/uploads/default_image/blank_thumbnail.jpg
+Potential poster: https://bx.alooytv6.xyz/uploads/default_image/blank_thumbnail.jpg
+Potential poster: https://bx.alooytv6.xyz/uploads/default_image/blank_thumbnail.jpg
+Potential poster: https://bx.alooytv6.xyz/uploads/default_image/blank_thumbnail.jpg
+Potential poster: https://bx.alooytv6.xyz/uploads/default_image/blank_thumbnail.jpg
