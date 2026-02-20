@@ -1,0 +1,71 @@
+name: Build iOS IPA
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+jobs:
+  build-ipa:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install npm dependencies
+        run: npm install
+
+      - name: Install CocoaPods
+        run: sudo gem install cocoapods
+
+      - name: Initialize Capacitor iOS
+        run: |
+          npx cap add ios || true
+          npx cap sync ios
+
+      - name: Update iOS display name (Arabic support)
+        run: |
+          cd ios/App
+          /usr/libexec/PlistBuddy -c "Set :CFBundleDisplayName رمضان 2026" App/Info.plist || true
+          /usr/libexec/PlistBuddy -c "Set :CFBundleName رمضان 2026" App/Info.plist || true
+
+      - name: Install Pods
+        run: |
+          cd ios/App
+          pod install --repo-update
+
+      - name: Build IPA (unsigned)
+        run: |
+          cd ios/App
+          xcodebuild \
+            -workspace App.xcworkspace \
+            -scheme App \
+            -configuration Release \
+            -sdk iphoneos \
+            -archivePath $PWD/build/App.xcarchive \
+            archive \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO \
+            PRODUCT_BUNDLE_IDENTIFIER="com.ramadan2026.app"
+
+      - name: Export IPA
+        run: |
+          mkdir -p ios/App/build/IPA
+          cp -r ios/App/build/App.xcarchive/Products/Applications/App.app ios/App/build/IPA/
+          cd ios/App/build/IPA
+          mkdir -p Payload
+          cp -r App.app Payload/
+          zip -r ramadan2026.ipa Payload/
+
+      - name: Upload IPA artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ramadan2026-ipa
+          path: ios/App/build/IPA/ramadan2026.ipa
+          retention-days: 30

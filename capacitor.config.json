@@ -1,0 +1,18 @@
+{
+  "appId": "com.ramadan2026.app",
+  "appName": "رمضان 2026",
+  "webDir": "public",
+  "server": {
+    "androidScheme": "https",
+    "cleartext": true,
+    "allowNavigation": [
+      "*"
+    ]
+  },
+  "android": {
+    "allowMixedContent": true
+  },
+  "ios": {
+    "allowsLinkPreview": false
+  }
+}

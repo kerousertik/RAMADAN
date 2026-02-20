@@ -275,7 +275,7 @@ class ReusableTCPServer(socketserver.TCPServer):
 if __name__ == "__main__":
     print(f"\n🌙 Ramadan 2026 — Port {PORT}", flush=True)
     print("=" * 50, flush=True)
-    os.chdir(os.path.dirname(os.path.abspath(__file__)) or ".")
+    os.chdir(os.path.join(os.path.dirname(os.path.abspath(__file__)), "public"))
     scrape_all()
     threading.Thread(target=auto_update, args=(30,), daemon=True).start()
     with ReusableTCPServer(("", PORT), Handler) as httpd:

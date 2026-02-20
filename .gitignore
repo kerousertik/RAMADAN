@@ -10,3 +10,22 @@ deep_ep.py
 check_missing.py
 check_quality.py
 *_out.txt
+
+# Node
+node_modules/
+npm-debug.log*
+
+# Android build outputs (keep source)
+android/app/build/
+android/.gradle/
+android/local.properties
+
+# iOS build outputs (keep source)
+ios/App/build/
+ios/App/Pods/
+ios/App/App.xcworkspace/xcuserdata/
+
+# Debug files
+*.html.bak
+genre_page.html
+debug_output.txt
