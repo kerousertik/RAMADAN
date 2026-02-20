@@ -31,6 +31,11 @@ jobs:
           /usr/libexec/PlistBuddy -c "Set :CFBundleDisplayName رمضان 2026" App/Info.plist || true
           /usr/libexec/PlistBuddy -c "Set :CFBundleName رمضان 2026" App/Info.plist || true
 
+      - name: Resolve SPM Dependencies
+        run: |
+          cd ios/App
+          xcodebuild -resolvePackageDependencies -workspace App.xcworkspace -scheme App
+
       - name: Build IPA (unsigned)
         run: |
           cd ios/App
