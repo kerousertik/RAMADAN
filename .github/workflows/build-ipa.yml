@@ -34,13 +34,13 @@ jobs:
       - name: Resolve SPM Dependencies
         run: |
           cd ios/App
-          xcodebuild -resolvePackageDependencies -workspace App.xcworkspace -scheme App
+          xcodebuild -resolvePackageDependencies -project App.xcodeproj -scheme App
 
       - name: Build IPA (unsigned)
         run: |
           cd ios/App
           xcodebuild \
-            -workspace App.xcworkspace \
+            -project App.xcodeproj \
             -scheme App \
             -configuration Release \
             -sdk iphoneos \
