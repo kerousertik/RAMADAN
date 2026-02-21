@@ -807,7 +807,11 @@
             const status = document.getElementById('videoStatus');
 
             overlay.style.opacity = '1';
+            overlay.style.pointerEvents = 'auto'; // Block interaction while fetching
             status.textContent = "جاري استخراج رابط البث المباشر...";
+
+            // Click on video to toggle play/pause (good for mobile/TV)
+            vPlayer.onclick = () => vPlayer.paused ? vPlayer.play() : vPlayer.pause();
 
             if (hls) { hls.destroy(); hls = null; }
             vPlayer.pause();
