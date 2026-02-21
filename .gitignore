@@ -29,3 +29,4 @@ ios/App/App.xcworkspace/xcuserdata/
 *.html.bak
 genre_page.html
 debug_output.txt
+build_log.txt
