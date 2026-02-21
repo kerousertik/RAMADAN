@@ -10,8 +10,18 @@ from urllib.parse import urljoin
 from datetime import datetime
 
 BASE = "https://a.alooytv7.xyz"
-PORT = int(os.environ.get("PORT", 9002))          # Railway injects PORT env var
+PORT = int(os.environ.get("PORT", 9002))
 DATA_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data.json")
+
+UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/122.0 Safari/537.36"
+HEADERS = {"User-Agent": UA, "Accept-Encoding": "identity", "Referer": BASE}
+
+# Stable entry points to find the current domain
+GATEWAYS = [
+    "https://fitnur.com/alooytv",
+    "https://alooytv.com",
+    "https://bx.alooytv6.xyz"
+]
 
 KNOWN_SERIES = [
     ("بنت النعمان",                      "bint-al-noaman"),
@@ -76,25 +86,57 @@ KNOWN_SERIES = [
     ("رحمة ج2",                         "rahma-2"),
 ]
 
-UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/122.0 Safari/537.36"
-HEADERS = {"User-Agent": UA, "Accept-Encoding": "identity", "Referer": BASE}
-
-# In-memory cache so Railway's ephemeral disk isn't a problem
+# In-memory cache
 _cache = {"series": [], "last_updated": ""}
 
+# ─── Self-Healing Domain Resolver ─────────────────────────────────────────────
+
+def resolve_base():
+    global BASE, HEADERS
+    print("🔍 Resolving active domain...", flush=True)
+    for g in GATEWAYS:
+        try:
+            r = requests.get(g, headers={"User-Agent": UA}, timeout=10, allow_redirects=True)
+            if r.status_code == 200:
+                # 1. Try redirect URL
+                if "alooytv" in r.url and ".xyz" in r.url:
+                    new_base = "/".join(r.url.split("/")[:3])
+                    if new_base != BASE:
+                        BASE = new_base
+                        HEADERS["Referer"] = BASE
+                        print(f"✨ Found new domain (redirect): {BASE}", flush=True)
+                    return True
+                
+                # 2. Try scraping links (e.g. "رمضان عربي 2026" link)
+                soup = BeautifulSoup(r.text, "html.parser")
+                for a in soup.find_all("a", href=True):
+                    h = a["href"]
+                    if "alooytv" in h and (".xyz" in h or ".link" in h):
+                        new_base = "/".join(h.split("/")[:3])
+                        BASE = new_base
+                        HEADERS["Referer"] = BASE
+                        print(f"✨ Found new domain (link): {BASE}", flush=True)
+                        return True
+        except Exception:
+            continue
+    print(f"⚠️ Could not resolve new domain, staying with: {BASE}", flush=True)
+    return False
 
 # ─── Fetch ────────────────────────────────────────────────────────────────────
 
-def fetch(url, retries=3):
+def fetch(url, retries=2, auto_resolve=True):
     for i in range(retries):
         try:
-            r = requests.get(url, headers=HEADERS, timeout=20)
+            r = requests.get(url, headers=HEADERS, timeout=12)
             if r.status_code == 200:
                 return r.text
-            time.sleep(3)
+            if r.status_code == 404 and auto_resolve:
+                resolve_base() # Maybe the domain shifted
+                url = url.replace(url.split("/")[2], BASE.split("/")[2]) # Update domain in URL
         except Exception:
             if i < retries - 1:
-                time.sleep(5)
+                if auto_resolve: resolve_base()
+                time.sleep(2)
     return ""
 
 
@@ -276,6 +318,7 @@ if __name__ == "__main__":
     print(f"\n🌙 Ramadan 2026 — Port {PORT}", flush=True)
     print("=" * 50, flush=True)
     os.chdir(os.path.join(os.path.dirname(os.path.abspath(__file__)), "public"))
+    resolve_base()
     scrape_all()
     threading.Thread(target=auto_update, args=(30,), daemon=True).start()
     with ReusableTCPServer(("", PORT), Handler) as httpd:
