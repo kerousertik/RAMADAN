@@ -1,5 +1,5 @@
 """
-Ramadan 2026 - Production Server
+Ramadan 2026 - Production Server by Karas
 Works locally & on Railway/Render/Fly.io
 """
 
@@ -315,7 +315,7 @@ class ReusableTCPServer(socketserver.TCPServer):
 
 
 if __name__ == "__main__":
-    print(f"\n🌙 Ramadan 2026 — Port {PORT}", flush=True)
+    print(f"\n🌙 Ramadan 2026 by Karas — Port {PORT}", flush=True)
     print("=" * 50, flush=True)
     os.chdir(os.path.join(os.path.dirname(os.path.abspath(__file__)), "public"))
     resolve_base()
