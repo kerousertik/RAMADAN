@@ -403,8 +403,8 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            background: rgba(0, 0, 0, 0.8);
-            z-index: 10;
+            background: #000;
+            z-index: 200;
             transition: all 0.3s;
             pointer-events: auto;
             color: #fff;
@@ -673,7 +673,7 @@
             const overlay = document.getElementById('videoOverlay');
             if (hls) hls.destroy();
             v.pause(); v.src = "";
-            overlay.style.opacity = '1';
+            overlay.style.display = 'flex';
             overlay.style.pointerEvents = 'auto';
 
             // Tap video to toggle play/pause
@@ -690,17 +690,17 @@
                             hls.attachMedia(v);
                             hls.on(Hls.Events.MANIFEST_PARSED, () => {
                                 v.play();
-                                overlay.style.opacity = '0';
+                                overlay.style.display = 'none';
                                 overlay.style.pointerEvents = 'none';
                             });
                         } else {
                             v.src = data.url; v.play();
-                            overlay.style.opacity = '0';
+                            overlay.style.display = 'none';
                             overlay.style.pointerEvents = 'none';
                         }
                     } else {
                         v.src = data.url; v.play();
-                        overlay.style.opacity = '0';
+                        overlay.style.display = 'none';
                         overlay.style.pointerEvents = 'none';
                     }
                 }
