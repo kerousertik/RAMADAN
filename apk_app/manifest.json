@@ -1,0 +1,20 @@
+{
+    "name": "رمضان 2026",
+    "short_name": "رمضان",
+    "description": "مسلسلات رمضان العربي 2026 - شاهد أحدث المسلسلات",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#07070f",
+    "theme_color": "#d4a534",
+    "orientation": "portrait",
+    "lang": "ar",
+    "dir": "rtl",
+    "icons": [
+        {
+            "src": "/logo.svg",
+            "sizes": "any",
+            "type": "image/svg+xml",
+            "purpose": "any maskable"
+        }
+    ]
+}

@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Ramadan 2026 Ultra</title>
+    <link rel="icon" type="image/svg+xml" href="logo.svg">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest/dist/hls.min.js"></script>
+    <style>
+        :root {
+            --gold: #d4a534;
+            --gold-light: #f5c842;
+            --dark: #05050a;
+            --dark-2: #0a0a15;
+            --card: rgba(255, 255, 255, 0.05);
+            --border: rgba(255, 255, 255, 0.1);
+            --accent: #e50914;
+            /* Netflix-style hint */
+            --radius: 12px;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            outline: none;
+        }
+
+        body {
+            background: var(--dark);
+            color: #fff;
+            font-family: 'Cairo', sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            /* We handle scrolling manually or via flex */
+            height: 100vh;
+            width: 100vw;
+        }
+
+        /* ── BACKGROUND ── */
+        .bg-glow {
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(circle at 20% 30%, #1a1a35 0%, #05050a 60%);
+            z-index: -1;
+        }
+
+        /* ── SPLASH ── */
+        #splash {
+            position: fixed;
+            inset: 0;
+            z-index: 10000;
+            background: #000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 1s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .splash-logo {
+            width: 180px;
+            height: 180px;
+            animation: breathe 3s infinite ease-in-out;
+        }
+
+        @keyframes breathe {
+
+            0%,
+            100% {
+                transform: scale(1);
+                opacity: 0.8;
+            }
+
+            50% {
+                transform: scale(1.1);
+                opacity: 1;
+            }
+        }
+
+        .loader-dots {
+            display: flex;
+            gap: 8px;
+            margin-top: 20px;
+        }
+
+        .dot {
+            width: 10px;
+            height: 10px;
+            background: var(--gold);
+            border-radius: 50%;
+            animation: dotJump 1.4s infinite;
+        }
+
+        .dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes dotJump {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        /* ── LAYOUT ── */
+        #app {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            opacity: 0;
+            transition: opacity 1s;
+        }
+
+        /* ── SIDEBAR (For TV Navigation) ── */
+        aside {
+            width: 80px;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(20px);
+            border-left: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 0;
+            z-index: 100;
+            transition: width 0.3s;
+        }
+
+        aside:hover,
+        aside:focus-within {
+            width: 200px;
+        }
+
+        .nav-item {
+            width: 100%;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .nav-item i {
+            font-size: 1.5rem;
+        }
+
+        .nav-label {
+            opacity: 0;
+            position: absolute;
+            right: 80px;
+            transition: 0.3s;
+            white-space: nowrap;
+            font-weight: 700;
+        }
+
+        aside:hover .nav-label {
+            opacity: 1;
+            right: 60px;
+        }
+
+        .nav-item:focus,
+        .nav-item.active {
+            color: var(--gold);
+            background: rgba(212, 165, 52, 0.1);
+        }
+
+        .nav-item:focus::before {
+            content: '';
+            position: absolute;
+            right: 0;
+            height: 100%;
+            width: 4px;
+            background: var(--gold);
+        }
+
+        /* ── MAIN CONTENT ── */
+        main {
+            flex: 1;
+            padding: 0;
+            overflow-y: auto;
+            scroll-behavior: smooth;
+        }
+
+        /* Hero Billboard */
+        .hero {
+            position: relative;
+            height: 70vh;
+            width: 100%;
+            display: flex;
+            align-items: flex-end;
+            padding: 60px;
+            overflow: hidden;
+        }
+
+        .hero-bg {
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+            background-size: cover;
+            background-position: center;
+            transition: scale 5s;
+        }
+
+        .hero:hover .hero-bg {
+            scale: 1.1;
+        }
+
+        .hero::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to top, var(--dark) 10%, transparent 50%),
+                linear-gradient(to right, var(--dark) 0%, transparent 60%);
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            max-width: 600px;
+            animation: fadeIn 1.2s;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .hero-title {
+            font-size: 4rem;
+            font-weight: 900;
+            line-height: 1;
+            margin: 0;
+            text-shadow: 0 4px 10px rgba(0, 0, 0, 0.8);
+        }
+
+        .hero-meta {
+            color: var(--gold);
+            font-weight: 700;
+            margin-top: 10px;
+            font-size: 1.2rem;
+        }
+
+        .hero-btns {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .btn-p {
+            padding: 12px 35px;
+            border-radius: 8px;
+            font-weight: 900;
+            font-size: 1.1rem;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: 0.3s;
+        }
+
+        .btn-play {
+            background: #fff;
+            color: #000;
+        }
+
+        .btn-play:focus,
+        .btn-play:hover {
+            background: var(--gold);
+            color: #fff;
+            scale: 1.1;
+        }
+
+        .btn-more {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            backdrop-filter: blur(10px);
+        }
+
+        .btn-more:focus {
+            scale: 1.1;
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Rows */
+        .rows-container {
+            padding: 40px 60px;
+        }
+
+        .row-title {
+            font-size: 1.5rem;
+            font-weight: 900;
+            margin-bottom: 20px;
+            padding-right: 10px;
+            border-right: 4px solid var(--gold);
+        }
+
+        .row-scroller {
+            display: flex;
+            gap: 20px;
+            overflow-x: auto;
+            padding: 10px 0 40px;
+            scroll-snap-type: x mandatory;
+        }
+
+        .row-scroller::-webkit-scrollbar {
+            display: none;
+        }
+
+        .card {
+            flex: 0 0 240px;
+            aspect-ratio: 2/3;
+            border-radius: var(--radius);
+            overflow: hidden;
+            background: var(--card);
+            border: 1px solid var(--border);
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            scroll-snap-align: start;
+            position: relative;
+        }
+
+        .card:focus,
+        .card:hover {
+            scale: 1.1;
+            border-color: var(--gold);
+            z-index: 10;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+            outline: 3px solid var(--gold);
+        }
+
+        .card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .card-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+            display: flex;
+            align-items: flex-end;
+            padding: 15px;
+            opacity: 0;
+            transition: 0.3s;
+        }
+
+        .card:focus .card-overlay,
+        .card:hover .card-overlay {
+            opacity: 1;
+        }
+
+        .card-name {
+            font-weight: 700;
+            font-size: 0.95rem;
+        }
+
+        /* ── MODAL ── */
+        #modal {
+            position: fixed;
+            inset: 0;
+            z-index: 2000;
+            background: black;
+            display: none;
+            flex-direction: column;
+        }
+
+        #modal.open {
+            display: flex;
+        }
+
+        .modal-top {
+            height: 70%;
+            position: relative;
+            background: #000;
+        }
+
+        #vPlayer {
+            width: 100%;
+            height: 100%;
+        }
+
+        .modal-bottom {
+            height: 30%;
+            background: var(--dark-2);
+            border-top: 1px solid var(--border);
+            padding: 20px 40px;
+            overflow-x: auto;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .ep-card {
+            flex: 0 0 160px;
+            height: 100px;
+            background: var(--card);
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-weight: 700;
+            transition: 0.2s;
+        }
+
+        .ep-card:focus,
+        .ep-card:hover {
+            scale: 1.1;
+            background: var(--gold);
+            color: #000;
+            outline: none;
+        }
+
+        .close-vid {
+            position: absolute;
+            top: 30px;
+            left: 30px;
+            z-index: 200;
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            border: 1px solid white;
+            padding: 10px 20px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 900;
+        }
+
+        .close-vid:focus {
+            background: red;
+            border-color: red;
+        }
+
+        /* ── TV UTILS ── */
+        .focusable {
+            outline: none;
+        }
+
+        /* MOBILE OVERRIDES */
+        @media (max-width: 768px) {
+            aside {
+                display: none;
+            }
+
+            .hero {
+                height: 40vh;
+                padding: 20px;
+            }
+
+            .hero-title {
+                font-size: 2rem;
+            }
+
+            .rows-container {
+                padding: 20px;
+            }
+
+            .card {
+                flex: 0 0 160px;
+            }
+
+            .modal-top {
+                height: 35%;
+            }
+
+            .modal-bottom {
+                height: 65%;
+                flex-direction: column;
+                overflow-y: auto;
+                align-items: stretch;
+            }
+
+            .ep-card {
+                flex: none;
+                height: 50px;
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="bg-glow"></div>
+
+    <div id="splash">
+        <img src="logo.svg" class="splash-logo" alt="Logo">
+        <div style="font-size: 2.5rem; font-weight: 900; color: var(--gold); margin-top: 10px;">رمضان 2026</div>
+        <div style="font-size: 1.2rem; margin-top: 5px; opacity: 0.6;">Ultra Premium by Karas</div>
+        <div class="loader-dots">
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+        </div>
+    </div>
+
+    <div id="app" style="flex-direction: row;">
+        <aside>
+            <div class="nav-item active focusable" tabindex="0">
+                <i>🏠</i> <span class="nav-label">الرئيسية</span>
+            </div>
+            <div class="nav-item focusable" tabindex="0">
+                <i>📁</i> <span class="nav-label">المسلسلات</span>
+            </div>
+            <div class="nav-item focusable" tabindex="0">
+                <i>⭐</i> <span class="nav-label">المفضلة</span>
+            </div>
+            <div style="margin-top: auto;" class="nav-item focusable" tabindex="0">
+                <i>⚙️</i> <span class="nav-label">الإعدادات</span>
+            </div>
+        </aside>
+
+        <main id="scroller">
+            <section class="hero" id="hero">
+                <div class="hero-bg" id="heroBg"></div>
+                <div class="hero-content">
+                    <h1 class="hero-title" id="heroTitle">...</h1>
+                    <div class="hero-meta">حصرياً على تطبيق Karas Ultra</div>
+                    <div class="hero-btns">
+                        <button class="btn-p btn-play focusable" tabindex="0" id="heroPlay">▶ شاهد الآن</button>
+                        <button class="btn-p btn-more focusable" tabindex="0">ℹ تفاصيل أكثر</button>
+                    </div>
+                </div>
+            </section>
+
+            <div class="rows-container" id="rows">
+                <!-- Rows will be injected here -->
+            </div>
+
+            <footer style="padding: 100px 60px; text-align: center; opacity: 0.4;">
+                <p>© 2026 Karas Ultra Premium Experience</p>
+                <p style="font-size: 0.8rem;">نسخة حصرية للأندرويد و TV Box</p>
+            </footer>
+        </main>
+    </div>
+
+    <div id="modal">
+        <div class="modal-top">
+            <button class="close-vid focusable" id="closeVid" tabindex="0">✕ إغلاق</button>
+            <video id="vPlayer" controls playsinline controlsList="nodownload"></video>
+        </div>
+        <div class="modal-bottom" id="epList">
+            <!-- Episodes -->
+        </div>
+    </div>
+
+    <script>
+        const API = "https://ramadan-v2j0.onrender.com";
+        let allData = [], hls = null;
+
+        async function init() {
+            try {
+                const res = await fetch(`${API}/api/data?v=${Date.now()}`);
+                const data = await res.json();
+                allData = data.series || [];
+
+                if (allData.length > 0) {
+                    const feat = allData[Math.floor(Math.random() * allData.length)];
+                    document.getElementById('heroBg').style.backgroundImage = `url(${feat.image})`;
+                    document.getElementById('heroTitle').innerHTML = feat.title;
+                    document.getElementById('heroPlay').onclick = () => openSeries(feat.slug);
+                }
+
+                renderRows();
+
+                setTimeout(() => {
+                    document.getElementById('splash').style.opacity = '0';
+                    document.getElementById('app').style.opacity = '1';
+                    setTimeout(() => document.getElementById('splash').remove(), 1000);
+                }, 1500);
+            } catch (e) {
+                console.error(e);
+                setTimeout(init, 5000);
+            }
+        }
+
+        function renderRows() {
+            const container = document.getElementById('rows');
+            // Group by arbitrary logic for visual rows
+            const sections = [
+                { title: "أحدث الحلقات", data: allData.slice(0, 15) },
+                { title: "الأكثر مشاهدة", data: allData.slice(15, 30) },
+                { title: "مسلسلات رمضان 2026", data: allData.slice(30) }
+            ];
+
+            container.innerHTML = sections.map(sec => `
+                <div class="row">
+                    <div class="row-title">${sec.title}</div>
+                    <div class="row-scroller">
+                        ${sec.data.map(s => `
+                            <div class="card focusable" tabindex="0" onclick="openSeries('${s.slug}')">
+                                <img src="${s.image}" alt="${s.title}" loading="lazy" onerror="this.src='logo.svg'">
+                                <div class="card-overlay">
+                                    <div class="card-name">${s.title}</div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function openSeries(slug) {
+            const series = allData.find(s => s.slug === slug);
+            document.getElementById('modal').classList.add('open');
+            document.getElementById('epList').innerHTML = '<p>جاري تحميل الحلقات...</p>';
+
+            try {
+                const res = await fetch(`${API}/api/episodes?slug=${slug}`);
+                const data = await res.json();
+                const eps = data.episodes || [];
+
+                document.getElementById('epList').innerHTML = eps.map((ep, i) => `
+                    <div class="ep-card focusable" tabindex="0" onclick="playEpisode('${ep.url}')">
+                        الحلقة ${i + 1}
+                    </div>
+                `).join('');
+
+                if (eps.length > 0) playEpisode(eps[0].url);
+            } catch (e) {
+                document.getElementById('epList').innerHTML = '<p>تعذر تحميل الحلقات</p>';
+            }
+        }
+
+        async function playEpisode(url) {
+            const v = document.getElementById('vPlayer');
+            if (hls) hls.destroy();
+            v.pause(); v.src = "";
+
+            try {
+                const res = await fetch(`${API}/api/stream?url=${encodeURIComponent(url)}`);
+                const data = await res.json();
+                if (data.url) {
+                    if (data.url.includes('.m3u8')) {
+                        if (Hls.isSupported()) {
+                            hls = new Hls();
+                            hls.loadSource(data.url);
+                            hls.attachMedia(v);
+                            hls.on(Hls.Events.MANIFEST_PARSED, () => v.play());
+                        } else {
+                            v.src = data.url; v.play();
+                        }
+                    } else {
+                        v.src = data.url; v.play();
+                    }
+                }
+            } catch (e) { alert("خطأ في التشغيل"); }
+        }
+
+        document.getElementById('closeVid').onclick = () => {
+            document.getElementById('modal').classList.remove('open');
+            document.getElementById('vPlayer').pause();
+        };
+
+        // ── TV NAVIGATION OVERRIDE ──
+        window.addEventListener('keydown', (e) => {
+            const active = document.activeElement;
+            if (active.classList.contains('focusable')) {
+                // Focus management is complex in JS, we rely on browser's spatial navigation 
+                // but we can add manual overrides here if needed.
+            }
+            if (e.key === 'Escape') document.getElementById('closeVid').click();
+        });
+
+        init();
+    </script>
+</body>
+
+</html>

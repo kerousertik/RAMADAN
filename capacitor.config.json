@@ -1,7 +1,7 @@
 {
   "appId": "com.ramadan2026.app",
   "appName": "رمضان 2026",
-  "webDir": "public",
+  "webDir": "apk_app",
   "server": {
     "androidScheme": "https",
     "cleartext": true,
