@@ -676,6 +676,9 @@
             overlay.style.opacity = '1';
             overlay.style.pointerEvents = 'auto';
 
+            // Tap video to toggle play/pause
+            v.onclick = () => v.paused ? v.play() : v.pause();
+
             try {
                 const res = await fetch(`${API}/api/stream?url=${encodeURIComponent(url)}`);
                 const data = await res.json();
