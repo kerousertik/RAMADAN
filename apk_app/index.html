@@ -397,9 +397,23 @@
             background: #000;
         }
 
+        #videoOverlay {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 10;
+            transition: all 0.3s;
+            pointer-events: auto;
+            color: #fff;
+        }
+
         #vPlayer {
             width: 100%;
             height: 100%;
+            z-index: 1;
         }
 
         .modal-bottom {
@@ -559,7 +573,15 @@
     <div id="modal">
         <div class="modal-top">
             <button class="close-vid focusable" id="closeVid" tabindex="0">✕ إغلاق</button>
-            <video id="vPlayer" controls playsinline controlsList="nodownload"></video>
+            <video id="vPlayer" controls playsinline x-webkit-airplay="allow" controlsList="nodownload"></video>
+            <div id="videoOverlay">
+                <div style="text-align:center">
+                    <div class="dot"
+                        style="display:inline-block; width:40px; height:40px; border:3px solid var(--gold); border-top-color:transparent; border-radius:50%; animation: dotJump 1s linear infinite">
+                    </div>
+                    <p style="margin-top:15px; font-weight:700" id="vStatus">جاري جلب الرابط...</p>
+                </div>
+            </div>
         </div>
         <div class="modal-bottom" id="epList">
             <!-- Episodes -->
@@ -626,6 +648,8 @@
             const series = allData.find(s => s.slug === slug);
             document.getElementById('modal').classList.add('open');
             document.getElementById('epList').innerHTML = '<p>جاري تحميل الحلقات...</p>';
+            document.getElementById('videoOverlay').style.opacity = '1';
+            document.getElementById('videoOverlay').style.pointerEvents = 'auto';
 
             try {
                 const res = await fetch(`${API}/api/episodes?slug=${slug}`);
@@ -646,8 +670,11 @@
 
         async function playEpisode(url) {
             const v = document.getElementById('vPlayer');
+            const overlay = document.getElementById('videoOverlay');
             if (hls) hls.destroy();
             v.pause(); v.src = "";
+            overlay.style.opacity = '1';
+            overlay.style.pointerEvents = 'auto';
 
             try {
                 const res = await fetch(`${API}/api/stream?url=${encodeURIComponent(url)}`);
@@ -658,12 +685,20 @@
                             hls = new Hls();
                             hls.loadSource(data.url);
                             hls.attachMedia(v);
-                            hls.on(Hls.Events.MANIFEST_PARSED, () => v.play());
+                            hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                                v.play();
+                                overlay.style.opacity = '0';
+                                overlay.style.pointerEvents = 'none';
+                            });
                         } else {
                             v.src = data.url; v.play();
+                            overlay.style.opacity = '0';
+                            overlay.style.pointerEvents = 'none';
                         }
                     } else {
                         v.src = data.url; v.play();
+                        overlay.style.opacity = '0';
+                        overlay.style.pointerEvents = 'none';
                     }
                 }
             } catch (e) { alert("خطأ في التشغيل"); }

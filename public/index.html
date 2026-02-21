@@ -696,9 +696,9 @@
         <div class="player-main">
             <button class="close-btn" id="closeBtn" tabindex="0">✕</button>
             <div class="video-container">
-                <video id="videoPlayer" controls playsinline volume="1.0"></video>
+                <video id="videoPlayer" controls playsinline x-webkit-airplay="allow" volume="1.0"></video>
                 <div id="videoOverlay"
-                    style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,0.8); transition: opacity 0.3s;">
+                    style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,0.8); transition: all 0.3s; pointer-events: auto;">
                     <div style="text-align:center">
                         <div class="loader-fill"
                             style="width:40px; height:40px; position:static; display:inline-block; border:3px solid var(--gold); border-top-color:transparent; border-radius:50%; animation: spin 1s linear infinite">
@@ -825,17 +825,20 @@
                             hls.attachMedia(vPlayer);
                             hls.on(Hls.Events.MANIFEST_PARSED, () => {
                                 overlay.style.opacity = '0';
+                                overlay.style.pointerEvents = 'none';
                                 vPlayer.play();
                             });
                         } else if (vPlayer.canPlayType('application/vnd.apple.mpegurl')) {
                             vPlayer.src = data.url;
                             vPlayer.play();
                             overlay.style.opacity = '0';
+                            overlay.style.pointerEvents = 'none';
                         }
                     } else {
                         vPlayer.src = data.url;
                         vPlayer.oncanplay = () => {
                             overlay.style.opacity = '0';
+                            overlay.style.pointerEvents = 'none';
                             vPlayer.play();
                         };
                     }
