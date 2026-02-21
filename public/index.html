@@ -559,55 +559,86 @@
         @media (max-width: 900px) {
             .backdrop {
                 flex-direction: column;
-            }
-
-            .player-left {
-                width: 100%;
-                height: 60%;
-                border-left: none;
-                border-top: 1px solid var(--border);
-                order: 2;
+                overflow: hidden;
             }
 
             .player-main {
                 width: 100%;
-                height: 40%;
+                height: auto;
+                aspect-ratio: 16/9;
                 order: 1;
                 flex: none;
+                z-index: 100;
+                background: #000;
+            }
+
+            .player-left {
+                width: 100%;
+                flex: 1;
+                border-left: none;
+                border-top: 2px solid var(--gold);
+                order: 2;
+                overflow-y: auto;
+                background: var(--dark);
             }
 
             .video-container {
                 height: 100%;
+                width: 100%;
             }
 
             .close-btn {
-                top: 15px;
-                left: 15px;
-                width: 40px;
-                height: 40px;
-                font-size: 1.2rem;
-                background: rgba(220, 53, 69, 0.8);
+                top: 10px;
+                left: 10px;
+                width: 35px;
+                height: 35px;
+                font-size: 1rem;
+                background: rgba(220, 53, 69, 0.9);
+                box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+                z-index: 200;
             }
 
-            .ph-poster {
+            .ph-poster,
+            .ph-title {
                 display: none;
             }
 
-            /* Hide large poster on mobile to save vertical space */
+            /* Strictly hide to save space */
             .player-header {
-                padding: 15px 20px;
+                padding: 10px 15px;
+                border-bottom: none;
+            }
+
+            .ph-sub {
+                font-size: 1.1rem;
+                font-weight: 700;
+                color: var(--gold);
+                margin: 0;
+            }
+
+            .ep-list {
+                padding: 10px;
             }
 
             .hero h1 {
-                font-size: 2rem;
+                font-size: 1.8rem;
             }
 
             .hero {
-                padding: 40px 20px 20px;
+                padding: 30px 20px 10px;
             }
 
             .grid-wrap {
-                padding: 10px 15px 40px;
+                padding: 10px 10px 40px;
+            }
+
+            .grid {
+                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+                gap: 15px;
+            }
+
+            .card-title {
+                font-size: 0.9rem;
             }
 
             .controls {
