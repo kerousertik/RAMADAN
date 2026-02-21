@@ -9,7 +9,7 @@ from bs4 import BeautifulSoup
 from urllib.parse import urljoin
 from datetime import datetime
 
-BASE = "https://bx.alooytv6.xyz"
+BASE = "https://a.alooytv7.xyz"
 PORT = int(os.environ.get("PORT", 9002))          # Railway injects PORT env var
 DATA_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data.json")
 
