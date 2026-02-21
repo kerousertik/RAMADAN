@@ -806,12 +806,8 @@
             const vPlayer = document.getElementById('videoPlayer');
             const status = document.getElementById('videoStatus');
 
-            overlay.style.opacity = '1';
-            overlay.style.pointerEvents = 'auto'; // Block interaction while fetching
+            overlay.style.display = 'flex';
             status.textContent = "جاري استخراج رابط البث المباشر...";
-
-            // Click on video to toggle play/pause (good for mobile/TV)
-            vPlayer.onclick = () => vPlayer.paused ? vPlayer.play() : vPlayer.pause();
 
             if (hls) { hls.destroy(); hls = null; }
             vPlayer.pause();
@@ -828,21 +824,18 @@
                             hls.loadSource(data.url);
                             hls.attachMedia(vPlayer);
                             hls.on(Hls.Events.MANIFEST_PARSED, () => {
-                                overlay.style.opacity = '0';
-                                overlay.style.pointerEvents = 'none';
+                                overlay.style.display = 'none';
                                 vPlayer.play();
                             });
                         } else if (vPlayer.canPlayType('application/vnd.apple.mpegurl')) {
                             vPlayer.src = data.url;
                             vPlayer.play();
-                            overlay.style.opacity = '0';
-                            overlay.style.pointerEvents = 'none';
+                            overlay.style.display = 'none';
                         }
                     } else {
                         vPlayer.src = data.url;
                         vPlayer.oncanplay = () => {
-                            overlay.style.opacity = '0';
-                            overlay.style.pointerEvents = 'none';
+                            overlay.style.display = 'none';
                             vPlayer.play();
                         };
                     }
