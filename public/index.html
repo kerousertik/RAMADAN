@@ -3,11 +3,11 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>مسلسلات رمضان 2026</title>
-    <!-- PWA & iOS Home Screen -->
-    <link rel="manifest" href="/manifest.json">
-    <meta name="theme-color" content="#d4a534">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>رمضان 2026 | مسلسلات عربية</title>
+    <!-- SEO & PWA -->
+    <meta name="description" content="جميع مسلسلات رمضان 2026 العربية والخليجية. شاهد الحلقات كاملة بجودة عالية.">
+    <meta name="theme-color" content="#07070f">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="رمضان 2026">
@@ -17,69 +17,133 @@
     <!-- HLS.js for m3u8 streams -->
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest/dist/hls.min.js"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box
-        }
-
         :root {
             --gold: #d4a534;
             --gold2: #f5c842;
             --dark: #07070f;
-            --dark2: #0d0d1e;
-            --card: #111127;
-            --border: rgba(212, 165, 52, .15);
-            --r: 14px;
-            --t: .3s cubic-bezier(.4, 0, .2, 1)
+            --dark2: #0b0b1c;
+            --card: rgba(255, 255, 255, 0.03);
+            --border: rgba(255, 255, 255, 0.08);
+            --glass: rgba(7, 7, 15, 0.7);
+            --r: 20px;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            outline: none;
         }
 
         body {
-            background: var(--dark);
+            background-color: var(--dark);
             color: #fff;
             font-family: 'Cairo', sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            background-image: radial-gradient(circle at 50% 0%, #1a1a2e 0%, var(--dark) 70%);
             min-height: 100vh;
-            overflow-x: hidden
         }
 
-        ::-webkit-scrollbar {
-            width: 5px
-        }
-
-        ::-webkit-scrollbar-track {
-            background: var(--dark)
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: rgba(212, 165, 52, .3);
-            border-radius: 3px
-        }
-
-        /* ── STARS ── */
+        /* ── STARS ANIMATION ── */
         #stars {
             position: fixed;
             inset: 0;
+            z-index: 0;
             pointer-events: none;
-            z-index: 0
         }
 
         .star {
             position: absolute;
             background: #fff;
             border-radius: 50%;
-            animation: twinkle var(--d, 3s) ease-in-out infinite;
-            opacity: 0
+            opacity: var(--o);
+            animation: twinkle var(--d) linear infinite;
         }
 
         @keyframes twinkle {
 
             0%,
             100% {
-                opacity: 0
+                opacity: var(--o);
             }
 
             50% {
-                opacity: var(--o, .6)
+                opacity: 0.1;
+            }
+        }
+
+        /* ── SPLASH SCREEN ── */
+        #splash {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            background: var(--dark);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.8s ease-out;
+        }
+
+        .splash-logo {
+            width: 150px;
+            height: 150px;
+            margin-bottom: 30px;
+            filter: drop-shadow(0 0 30px rgba(212, 165, 52, 0.4));
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                opacity: 0.8;
+            }
+
+            50% {
+                transform: scale(1.05);
+                opacity: 1;
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 0.8;
+            }
+        }
+
+        .splash-title {
+            font-size: 2.5rem;
+            font-weight: 900;
+            background: linear-gradient(to bottom, var(--gold2), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .loader-bar {
+            width: 200px;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .loader-fill {
+            position: absolute;
+            height: 100%;
+            width: 40%;
+            background: var(--gold);
+            animation: load 1.5s infinite ease-in-out;
+        }
+
+        @keyframes load {
+            from {
+                left: -40%;
+            }
+
+            to {
+                left: 100%;
             }
         }
 
@@ -87,161 +151,130 @@
         .hero {
             position: relative;
             z-index: 1;
+            padding: 80px 40px 40px;
             text-align: center;
-            padding: 55px 40px 38px;
-            background: linear-gradient(180deg, rgba(212, 165, 52, .07) 0%, transparent 100%);
-            border-bottom: 1px solid var(--border);
-        }
-
-        .hero::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: radial-gradient(ellipse 80% 60% at 50% -10%, rgba(212, 165, 52, .13), transparent);
-            pointer-events: none
         }
 
         .moon {
-            font-size: 64px;
-            animation: float 4s ease-in-out infinite;
-            display: inline-block
+            font-size: 4rem;
+            display: block;
+            margin-bottom: 10px;
         }
 
-        @keyframes float {
-
-            0%,
-            100% {
-                transform: translateY(0)
-            }
-
-            50% {
-                transform: translateY(-12px)
-            }
-        }
-
-        .hero h1 {
-            font-size: clamp(2rem, 5vw, 3.4rem);
+        h1 {
+            margin: 0;
+            font-size: 3rem;
             font-weight: 900;
-            background: linear-gradient(135deg, #f5c842, #d4a534, #f5c842);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin: .4rem 0 .25rem;
-            letter-spacing: -.5px
+            letter-spacing: -1px;
         }
 
         .hero p {
-            color: rgba(255, 255, 255, .45);
-            font-size: .95rem;
-            margin-bottom: 18px
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 1.1rem;
+            margin: 10px 0 20px;
         }
 
         .hero-badge {
             display: inline-flex;
             align-items: center;
-            gap: 8px;
-            background: rgba(212, 165, 52, .1);
-            border: 1px solid var(--border);
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 8px 18px;
             border-radius: 50px;
-            padding: 6px 20px;
-            font-size: .85rem;
-            color: var(--gold2)
+            border: 1px solid var(--border);
+            font-size: 0.9rem;
+            color: var(--gold);
         }
 
         /* ── CONTROLS ── */
         .controls {
             position: sticky;
-            top: 0;
+            top: 20px;
             z-index: 10;
-            background: rgba(7, 7, 15, .88);
-            backdrop-filter: blur(20px);
-            border-bottom: 1px solid var(--border);
-            padding: 13px 40px;
             display: flex;
             align-items: center;
-            gap: 12px;
-            flex-wrap: wrap;
+            gap: 15px;
+            padding: 15px 40px;
+            backdrop-filter: blur(20px);
+            background: var(--glass);
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 20px;
         }
 
         .search-wrap {
             position: relative;
             flex: 1;
-            min-width: 180px;
-            max-width: 360px
         }
 
         .search-wrap input {
             width: 100%;
-            background: rgba(255, 255, 255, .05);
+            background: rgba(255, 255, 255, 0.05);
             border: 1px solid var(--border);
-            border-radius: 50px;
-            padding: 10px 20px 10px 42px;
+            border-radius: 15px;
+            padding: 14px 50px 14px 20px;
             color: #fff;
-            font-family: 'Cairo', sans-serif;
-            font-size: .9rem;
-            transition: var(--t);
-            outline: none
+            font-family: inherit;
+            font-size: 1rem;
+            transition: all 0.3s;
         }
 
         .search-wrap input:focus {
+            background: rgba(255, 255, 255, 0.1);
             border-color: var(--gold);
-            background: rgba(212, 165, 52, .07)
+            box-shadow: 0 0 20px rgba(212, 165, 52, 0.15);
         }
 
-        .search-wrap .si {
+        .si {
             position: absolute;
-            left: 15px;
+            right: 18px;
             top: 50%;
             transform: translateY(-50%);
-            opacity: .4
-        }
-
-        .count-pill {
-            margin-right: auto;
-            background: rgba(212, 165, 52, .08);
-            border: 1px solid var(--border);
-            border-radius: 50px;
-            padding: 6px 16px;
-            font-size: .82rem;
-            color: var(--gold2);
-            white-space: nowrap
-        }
-
-        .updated {
-            color: rgba(255, 255, 255, .25);
-            font-size: .72rem;
-            white-space: nowrap
+            opacity: 0.4;
         }
 
         /* ── GRID ── */
         .grid-wrap {
             position: relative;
             z-index: 1;
-            padding: 34px 40px 60px;
+            padding: 20px 40px 60px;
             max-width: 1600px;
-            margin: 0 auto
+            margin: 0 auto;
         }
 
         .section-label {
-            font-size: 1.05rem;
+            font-size: 1.2rem;
             font-weight: 700;
             color: var(--gold);
             display: flex;
             align-items: center;
-            gap: 10px;
-            margin-bottom: 22px
+            gap: 12px;
+            margin-bottom: 30px;
         }
 
         .section-label::after {
             content: '';
             flex: 1;
             height: 1px;
-            background: var(--border)
+            background: var(--border);
         }
 
         .grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
-            gap: 20px
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 25px;
+        }
+
+        /* ── TV FOCUS SUPPORT ── */
+        .card:focus,
+        .ep-item:focus,
+        .close-btn:focus,
+        .btn-ext:focus,
+        input:focus {
+            outline: 3px solid var(--gold) !important;
+            transform: scale(1.08) translateY(-5px) !important;
+            z-index: 5;
+            box-shadow: 0 0 40px rgba(212, 165, 52, 0.5) !important;
         }
 
         /* ── CARD ── */
@@ -252,94 +285,86 @@
             background: var(--card);
             border: 1px solid var(--border);
             cursor: pointer;
-            transition: transform .3s, box-shadow .3s, border-color .3s;
-            animation: pop .45s ease-out backwards
+            transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+            animation: fadeInUp 0.6s ease-out backwards;
+            text-decoration: none;
+            display: block;
         }
 
-        @keyframes pop {
+        @keyframes fadeInUp {
             from {
                 opacity: 0;
-                transform: translateY(18px) scale(.96)
+                transform: translateY(30px);
             }
 
             to {
                 opacity: 1;
-                transform: none
+                transform: translateY(0);
             }
         }
 
         .card:hover {
-            transform: translateY(-10px) scale(1.03);
-            border-color: rgba(212, 165, 52, .5);
-            box-shadow: 0 24px 50px rgba(0, 0, 0, .5), 0 0 40px rgba(212, 165, 52, .1)
+            transform: translateY(-12px);
+            border-color: var(--gold);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6);
         }
 
         .card-img {
             position: relative;
             aspect-ratio: 2/3;
             overflow: hidden;
-            background: #0b0b1c
+            background: #0b0b1c;
         }
 
         .card-img img {
             width: 100%;
             height: 100%;
             object-fit: cover;
-            transition: transform .5s;
-            display: block
+            transition: transform 0.6s;
         }
 
         .card:hover .card-img img {
-            transform: scale(1.1)
+            transform: scale(1.1);
         }
 
         .card-img::after {
             content: '';
             position: absolute;
             inset: 0;
-            background: linear-gradient(to top, rgba(7, 7, 15, .95) 0%, rgba(7, 7, 15, .25) 50%, transparent 100%)
+            background: linear-gradient(to top, var(--dark) 0%, transparent 60%);
         }
 
-        .badge {
+        .play-overlay {
             position: absolute;
-            top: 10px;
-            left: 10px;
-            z-index: 2;
-            background: var(--gold);
-            color: #07070f;
-            font-size: .63rem;
-            font-weight: 900;
-            padding: 3px 9px;
-            border-radius: 6px;
-            letter-spacing: .5px
-        }
-
-        .play-btn {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            z-index: 3;
-            transform: translate(-50%, -50%) scale(0);
-            width: 64px;
-            height: 64px;
-            border-radius: 50%;
-            background: rgba(212, 165, 52, .92);
+            inset: 0;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: transform .3s, box-shadow .3s;
-            box-shadow: 0 0 40px rgba(212, 165, 52, .4)
+            background: rgba(7, 7, 15, 0.4);
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 2;
         }
 
-        .play-btn svg {
-            width: 26px;
-            height: 26px;
-            fill: #07070f;
-            margin-right: -3px
+        .card:hover .play-overlay {
+            opacity: 1;
         }
 
-        .card:hover .play-btn {
-            transform: translate(-50%, -50%) scale(1)
+        .play-circle {
+            width: 60px;
+            height: 60px;
+            background: var(--gold);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 30px rgba(212, 165, 52, 0.4);
+            transform: scale(0.8);
+            transition: transform 0.3s;
+        }
+
+        .card:hover .play-circle {
+            transform: scale(1);
         }
 
         .card-meta {
@@ -347,378 +372,204 @@
             bottom: 0;
             left: 0;
             right: 0;
-            z-index: 2;
-            padding: 14px 12px 12px
+            padding: 20px;
+            z-index: 3;
         }
 
         .card-title {
-            font-size: .88rem;
+            font-size: 1.05rem;
             font-weight: 700;
             line-height: 1.4;
+            max-height: 2.8em;
             display: -webkit-box;
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
-            overflow: hidden
+            overflow: hidden;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
         }
 
-        /* ── STATE ── */
-        .state {
-            text-align: center;
-            padding: 100px 20px;
-            color: rgba(255, 255, 255, .35)
-        }
-
-        .spinner {
-            width: 48px;
-            height: 48px;
-            border: 3px solid var(--border);
-            border-top-color: var(--gold);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 20px
-        }
-
-        @keyframes spin {
-            to {
-                transform: rotate(360deg)
-            }
-        }
-
-        /* ═══════════════════════════════════
-   PLAYER MODAL
-═══════════════════════════════════ */
+        /* ── PLAYER MODAL ── */
         .backdrop {
             position: fixed;
             inset: 0;
-            z-index: 100;
-            background: rgba(0, 0, 0, .95);
-            backdrop-filter: blur(14px);
+            z-index: 1000;
+            background: rgba(0, 0, 0, 0.98);
+            backdrop-filter: blur(20px);
             display: flex;
-            flex-direction: column;
             opacity: 0;
             pointer-events: none;
-            transition: opacity .3s
+            transition: opacity 0.4s;
         }
 
         .backdrop.open {
             opacity: 1;
-            pointer-events: all
+            pointer-events: all;
         }
 
-        /* TOP BAR */
-        .player-top {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            padding: 14px 20px;
-            border-bottom: 1px solid var(--border);
-            background: var(--dark2);
-            flex-shrink: 0
-        }
-
-        .ptop-poster {
-            width: 46px;
-            height: 68px;
-            border-radius: 8px;
-            object-fit: cover;
-            flex-shrink: 0
-        }
-
-        .ptop-info {
-            flex: 1;
-            min-width: 0
-        }
-
-        .ptop-title {
-            font-size: 1.15rem;
-            font-weight: 900
-        }
-
-        .ptop-sub {
-            font-size: .78rem;
-            color: var(--gold2);
-            margin-top: 3px
-        }
-
-        .ep-label {
-            background: rgba(212, 165, 52, .15);
-            border: 1px solid var(--border);
-            border-radius: 50px;
-            padding: 2px 10px;
-            font-size: .72rem;
-            color: var(--gold)
-        }
-
-        .close-btn {
-            width: 38px;
-            height: 38px;
-            border-radius: 50%;
-            flex-shrink: 0;
-            background: rgba(255, 255, 255, .07);
-            border: 1px solid var(--border);
-            color: #fff;
-            font-size: 1.1rem;
-            cursor: pointer;
-            transition: background .2s;
-            display: flex;
-            align-items: center;
-            justify-content: center
-        }
-
-        .close-btn:hover {
-            background: rgba(220, 50, 50, .4)
-        }
-
-        /* MAIN BODY */
-        .player-body {
-            flex: 1;
-            display: flex;
-            min-height: 0;
-            overflow: hidden
-        }
-
-        /* SIDEBAR */
-        .ep-sidebar {
-            width: 260px;
-            flex-shrink: 0;
-            border-right: 1px solid var(--border);
+        .player-left {
+            width: 320px;
+            background: #0b0b1c;
+            border-left: 1px solid var(--border);
             display: flex;
             flex-direction: column;
-            background: var(--dark2)
+            animation: slideInLeft 0.5s ease-out;
         }
 
-        .ep-sidebar-title {
-            padding: 14px 16px;
-            font-size: .82rem;
-            font-weight: 700;
-            color: rgba(255, 255, 255, .5);
+        @keyframes slideInLeft {
+            from {
+                transform: translateX(100%);
+            }
+
+            to {
+                transform: translateX(0);
+            }
+        }
+
+        .player-header {
+            padding: 30px;
             border-bottom: 1px solid var(--border);
-            text-transform: uppercase
+        }
+
+        .ph-poster {
+            width: 100%;
+            aspect-ratio: 2/1.4;
+            object-fit: cover;
+            border-radius: var(--r);
+            margin-bottom: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .ph-title {
+            font-size: 1.4rem;
+            font-weight: 900;
+            margin-bottom: 5px;
+        }
+
+        .ph-sub {
+            font-size: 0.85rem;
+            color: var(--gold);
         }
 
         .ep-list {
             flex: 1;
             overflow-y: auto;
-            padding: 8px 0
+            padding: 20px;
+            gap: 10px;
+            display: flex;
+            flex-direction: column;
         }
 
         .ep-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 10px 16px;
-            cursor: pointer;
-            transition: background .15s;
-            border-bottom: 1px solid rgba(255, 255, 255, .03)
-        }
-
-        .ep-item:hover {
-            background: rgba(212, 165, 52, .06)
-        }
-
-        .ep-item.active {
-            background: rgba(212, 165, 52, .12);
-            border-right: 3px solid var(--gold)
-        }
-
-        .ep-num {
-            min-width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, .06);
+            padding: 15px 20px;
+            background: rgba(255, 255, 255, 0.03);
             border: 1px solid var(--border);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
             display: flex;
             align-items: center;
-            justify-content: center;
-            font-size: .78rem;
-            font-weight: 700;
-            color: var(--gold2);
-            flex-shrink: 0
+            gap: 15px;
+            text-decoration: none;
+            color: #fff;
+        }
+
+        .ep-item:hover,
+        .ep-item.active {
+            background: rgba(212, 165, 52, 0.1);
+            border-color: var(--gold);
         }
 
         .ep-item.active .ep-num {
             background: var(--gold);
-            color: #07070f;
-            border-color: var(--gold)
+            color: var(--dark);
         }
 
-        .ep-name {
-            font-size: .82rem;
-            line-height: 1.4;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden
-        }
-
-        .ep-loading {
-            padding: 30px;
-            text-align: center;
-            color: rgba(255, 255, 255, .3);
-            font-size: .85rem
-        }
-
-        /* VIDEO PANEL */
-        .video-panel {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            min-width: 0
-        }
-
-        .video-wrap {
-            position: relative;
-            background: #000;
-            flex: 1;
-            min-height: 0;
+        .ep-num {
+            width: 35px;
+            height: 35px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 50%;
             display: flex;
             align-items: center;
-            justify-content: center
+            justify-content: center;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        /* ── VIDEO RIGHT ── */
+        .player-main {
+            flex: 1;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .video-container {
+            flex: 1;
+            background: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
         }
 
         video {
             width: 100%;
             height: 100%;
-            max-height: 100%;
-            display: block;
-            background: #000
+            object-fit: contain;
         }
 
-        .vid-overlay {
+        .close-btn {
             position: absolute;
-            inset: 0;
+            top: 30px;
+            left: 30px;
+            z-index: 10;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--glass);
+            border: 1px solid var(--border);
+            color: #fff;
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 18px;
-            background: rgba(7, 7, 15, .9);
-            transition: opacity .3s;
-            z-index: 2
-        }
-
-        .vid-overlay.hidden {
-            opacity: 0;
-            pointer-events: none
-        }
-
-        .vid-spinner {
-            width: 52px;
-            height: 52px;
-            border: 3px solid var(--border);
-            border-top-color: var(--gold);
-            border-radius: 50%;
-            animation: spin 1s linear infinite
-        }
-
-        .vid-msg {
-            color: rgba(255, 255, 255, .5);
-            font-size: .9rem;
-            text-align: center;
-            max-width: 280px;
-            line-height: 1.6
-        }
-
-        .vid-err {
-            color: #ff6b6b;
-            font-size: .85rem;
-            text-align: center;
-            max-width: 300px;
-            line-height: 1.6
-        }
-
-        .btn-ext {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            margin-top: 8px;
-            background: linear-gradient(135deg, var(--gold2), var(--gold));
-            color: #07070f;
-            font-family: 'Cairo', sans-serif;
-            font-size: .9rem;
-            font-weight: 900;
-            padding: 12px 26px;
-            border-radius: 50px;
-            border: none;
             cursor: pointer;
-            text-decoration: none;
-            transition: transform .2s
+            font-size: 1.5rem;
+            transition: all 0.2s;
         }
 
-        .btn-ext:hover {
-            transform: scale(1.04)
+        .close-btn:hover {
+            background: #dc3545;
         }
 
+        /* FOOTER */
         footer {
-            position: relative;
-            z-index: 1;
+            padding: 60px 40px;
             text-align: center;
-            padding: 24px;
             border-top: 1px solid var(--border);
-            color: rgba(255, 255, 255, .2);
-            font-size: .78rem
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 0.9rem;
         }
 
-        footer a {
+        footer strong {
             color: var(--gold);
-            text-decoration: none
         }
 
         /* RESPONSIVE */
-        @media(max-width:768px) {
-            .hero {
-                padding: 40px 18px 28px
+        @media (max-width: 900px) {
+            .backdrop {
+                flex-direction: column-reverse;
             }
 
-            .controls {
-                padding: 12px 16px
-            }
-
-            .grid-wrap {
-                padding: 22px 16px 40px
-            }
-
-            .grid {
-                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-                gap: 12px
-            }
-
-            .ep-sidebar {
-                width: 200px
-            }
-
-            .player-top {
-                padding: 10px 14px
-            }
-        }
-
-        @media(max-width:600px) {
-            .grid {
-                grid-template-columns: repeat(2, 1fr)
-            }
-
-            .player-body {
-                flex-direction: column
-            }
-
-            .ep-sidebar {
+            .player-left {
                 width: 100%;
-                height: 180px;
-                border-right: none;
-                border-top: 1px solid var(--border)
+                height: 40%;
+                border-left: none;
+                border-top: 1px solid var(--border);
             }
 
-            .ep-list {
-                flex-direction: row;
-                display: flex;
-                overflow-x: auto;
-                overflow-y: hidden;
-                padding: 8px
-            }
-
-            .ep-item {
-                flex-shrink: 0;
-                gap: 6px
+            .hero h1 {
+                font-size: 2rem;
             }
         }
     </style>
@@ -727,265 +578,218 @@
 <body>
     <div id="stars"></div>
 
-    <!-- HERO -->
+    <!-- SPLASH -->
+    <div id="splash">
+        <svg class="splash-logo" viewBox="0 0 512 512">
+            <path
+                d="M360 256c0 88.366-71.634 160-160 160-88.366 0-160-71.634-160-160s71.634-160 160-160c-25.5 0-48.5 6-68 16 66.274 22.091 114 84.569 114 158 0 73.431-47.726 135.909-114 158 25.5 10 48.5 16 68 16 88.366 0 160-71.634 160-160z"
+                fill="#d4a534" />
+            <path d="M280 256l-60-40v80z" fill="#07070f" />
+        </svg>
+        <div class="splash-title">رمضان 2026</div>
+        <div class="loader-bar">
+            <div class="loader-fill"></div>
+        </div>
+        <p style="margin-top:20px; color:rgba(255,255,255,0.4)">جاري تحميل المحتوى عبر سحاب Karas...</p>
+    </div>
+
+    <!-- MAIN CONTENT -->
     <header class="hero">
         <span class="moon">🌙</span>
-        <h1>مسلسلات رمضان 2026</h1>
-        <p>جميع المسلسلات العربية · شاهد الحلقات مباشرة</p>
-        <div class="hero-badge"><span>📺</span><span id="heroCount">جاري التحميل...</span></div>
+        <h1>رمضان <span style="color:var(--gold)">2026</span></h1>
+        <p>بواسطة Karas · تجربة المشاهدة الفاخرة</p>
+        <div class="hero-badge" id="heroStats">...</div>
     </header>
 
-    <!-- CONTROLS -->
     <div class="controls">
         <div class="search-wrap">
             <span class="si">🔍</span>
-            <input id="searchInput" type="text" placeholder="ابحث عن مسلسل...">
+            <input type="text" id="searchInput" placeholder="ابحث عن مسلسلك المفضل...">
         </div>
-        <div class="count-pill" id="countPill"></div>
-        <span class="updated" id="updatedAt"></span>
     </div>
 
-    <!-- GRID -->
-    <div class="grid-wrap">
-        <div class="section-label">🌙 مسلسلات رمضان العربي 2026</div>
-        <div class="state" id="loadState">
-            <div class="spinner"></div>
-            <p>جاري التحميل...</p>
-        </div>
+    <main class="grid-wrap">
+        <div class="section-label">المسلسلات المتاحة</div>
         <div class="grid" id="grid"></div>
-        <div class="state" id="emptyState" style="display:none">
-            <div style="font-size:3rem">🔍</div>
-            <p>لا توجد نتائج</p>
-        </div>
-    </div>
+    </main>
 
     <footer>
-        <p>🌙 رمضان كريم 2026 · المصدر: <a href="https://bx.alooytv6.xyz" target="_blank">alooytv</a></p>
+        <p>حقوق النشر © 2026 | بواسطة <strong>Karas</strong></p>
+        <p style="font-size: 11px">جميع الحقوق محفوظة · Ramadan 2026 Ultra Series</p>
     </footer>
 
-    <!-- PLAYER MODAL -->
-    <div class="backdrop" id="backdrop">
-        <!-- Top bar -->
-        <div class="player-top">
-            <img class="ptop-poster" id="mPoster" src="" alt="">
-            <div class="ptop-info">
-                <div class="ptop-title" id="mTitle"></div>
-                <div class="ptop-sub">
-                    <span>🎬 عربي</span> · <span>HD</span> · <span class="ep-label" id="mEpLabel">الحلقة 1</span>
+    <!-- MODAL -->
+    <div class="backdrop" id="playerModal">
+        <div class="player-main">
+            <button class="close-btn" id="closeBtn" tabindex="0">✕</button>
+            <div class="video-container">
+                <video id="videoPlayer" controls playsinline volume="1.0"></video>
+                <div id="videoOverlay"
+                    style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,0.8); transition: opacity 0.3s;">
+                    <div style="text-align:center">
+                        <div class="loader-fill"
+                            style="width:40px; height:40px; position:static; display:inline-block; border:3px solid var(--gold); border-top-color:transparent; border-radius:50%; animation: spin 1s linear infinite">
+                        </div>
+                        <p id="videoStatus" style="margin-top:15px">جاري جلب رابط الفيديو...</p>
+                    </div>
                 </div>
             </div>
-            <button class="close-btn" id="closeBtn">✕</button>
         </div>
-
-        <!-- Body -->
-        <div class="player-body">
-            <!-- Episode sidebar -->
-            <div class="ep-sidebar">
-                <div class="ep-sidebar-title">الحلقات</div>
-                <div class="ep-list" id="epList">
-                    <div class="ep-loading" id="epLoading">
-                        <div class="spinner" style="width:32px;height:32px;border-width:2px;margin-bottom:10px"></div>
-                        جاري تحميل الحلقات...
-                    </div>
-                </div>
+        <div class="player-left">
+            <div class="player-header">
+                <img id="mPoster" class="ph-poster" src="" alt="">
+                <div class="ph-title" id="mTitle"></div>
+                <div class="ph-sub" id="mSub">قائمة الحلقات</div>
             </div>
-
-            <!-- Video player -->
-            <div class="video-panel">
-                <div class="video-wrap" id="videoWrap">
-                    <video id="vid" controls playsinline preload="metadata"></video>
-                    <div class="vid-overlay" id="vidOverlay">
-                        <div class="vid-spinner" id="vidSpinner"></div>
-                        <div class="vid-msg" id="vidMsg">جاري تحميل الفيديو...</div>
-                    </div>
-                </div>
-            </div>
+            <div class="ep-list" id="epList"></div>
         </div>
     </div>
 
     <script>
-        const API = ``; // empty = same origin (works locally & on Railway)
-        let allSeries = [], filtered = [], currentSlug = '', currentEpUrl = '', hls = null;
+        const API = "https://ramadan-v2j0.onrender.com";
+        let allData = [], filtered = [], hls = null;
 
-        // ── Stars ──────────────────────────────────────────────────────────────
-        (function () {
-            const c = document.getElementById('stars');
-            for (let i = 0; i < 90; i++) {
-                const s = document.createElement('div'); s.className = 'star';
-                s.style.cssText = `left:${Math.random() * 100}%;top:${Math.random() * 100}%;
-      width:${1 + Math.random() * 2}px;height:${1 + Math.random() * 2}px;
-      --d:${2 + Math.random() * 5}s;--o:${.2 + Math.random() * .8};
-      animation-delay:${Math.random() * 6}s`;
-                c.appendChild(s);
-            }
-        })();
+        // ── STARS ──
+        const starsContainer = document.getElementById('stars');
+        for (let i = 0; i < 100; i++) {
+            const star = document.createElement('div');
+            star.className = 'star';
+            star.style.cssText = `left:${Math.random() * 100}%; top:${Math.random() * 100}%; width:${1 + Math.random() * 2}px; height:${1 + Math.random() * 2}px; --d:${3 + Math.random() * 5}s; --o:${0.2 + Math.random() * 0.8}; animation-delay:${Math.random() * 5}s`;
+            starsContainer.appendChild(star);
+        }
 
-        // ── Data ───────────────────────────────────────────────────────────────
-        async function loadData() {
+        // ── INIT ──
+        async function init() {
             try {
-                const r = await fetch(API + '/api/data?t=' + Date.now());
-                if (!r.ok) throw Error('no data');
-                const d = await r.json();
-                allSeries = d.series || [];
-                document.getElementById('heroCount').textContent = d.total + ' مسلسل عربي';
-                document.getElementById('countPill').textContent = d.total + ' مسلسل';
-                if (d.last_updated) document.getElementById('updatedAt').textContent = 'آخر تحديث: ' + d.last_updated;
-                document.getElementById('loadState').style.display = 'none';
-                renderGrid();
-            } catch {
-                document.getElementById('loadState').innerHTML = `
-      <div style="font-size:3rem">⚠️</div>
-      <p>شغّل: <code>python server.py</code></p>`;
+                const res = await fetch(API + "/api/data?v=" + Date.now());
+                const data = await res.json();
+                allData = data.series || [];
+                document.getElementById('heroStats').textContent = `تنبيه: ${data.total} مسلسل متوفر حالياً`;
+                renderGrid(allData);
+                setTimeout(() => {
+                    document.getElementById('splash').style.opacity = '0';
+                    setTimeout(() => document.getElementById('splash').remove(), 800);
+                }, 1000);
+            } catch (e) {
+                console.error(e);
+                // Retry every 5 seconds if server is waking up
+                setTimeout(init, 5000);
             }
         }
 
-        // ── Grid ───────────────────────────────────────────────────────────────
-        function renderGrid() {
-            const g = document.getElementById('grid');
-            const e = document.getElementById('emptyState');
-            const q = document.getElementById('searchInput').value.trim().toLowerCase();
-            filtered = q ? allSeries.filter(s => s.title.includes(q) || s.title.toLowerCase().includes(q)) : allSeries;
-            if (!filtered.length) { g.innerHTML = ''; e.style.display = 'block'; return }
-            e.style.display = 'none';
-            g.innerHTML = filtered.map((s, i) => `
-    <div class="card" style="animation-delay:${Math.min(i * .04, 1.5)}s" onclick="openSeries(${i})">
-      <div class="card-img">
-        ${s.image ? `<img src="${s.image}" alt="${s.title}" loading="lazy" onerror="this.style.display='none'">` : ''}
-        <span class="badge">HD</span>
-        <div class="play-btn"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>
-        <div class="card-meta"><div class="card-title">${s.title}</div></div>
-      </div>
-    </div>`).join('');
+        function renderGrid(series) {
+            const grid = document.getElementById('grid');
+            grid.innerHTML = series.map((s, i) => `
+                <button class="card" onclick="openSeries('${s.slug}')" tabindex="0" style="animation-delay: ${i * 0.05}s">
+                    <div class="card-img">
+                        <img src="${s.image}" alt="${s.title}" loading="lazy" onerror="this.src='/logo.svg'">
+                        <div class="play-overlay"><div class="play-circle">▶</div></div>
+                    </div>
+                    <div class="card-meta">
+                        <div class="card-title">${s.title}</div>
+                    </div>
+                </button>
+            `).join('');
         }
-        let st;
-        document.getElementById('searchInput').addEventListener('input', () => { clearTimeout(st); st = setTimeout(renderGrid, 180) });
 
-        // ── Open Series ────────────────────────────────────────────────────────
-        async function openSeries(idx) {
-            const s = filtered[idx]; if (!s) return;
-            currentSlug = s.slug || ''; currentEpUrl = '';
+        // ── SEARCH ──
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            const q = e.target.value.toLowerCase();
+            filtered = allData.filter(s => s.title.toLowerCase().includes(q));
+            renderGrid(filtered);
+        });
 
-            document.getElementById('mTitle').textContent = s.title;
-            document.getElementById('mPoster').src = s.image || '';
-            document.getElementById('mEpLabel').textContent = 'جاري التحميل...';
-            document.getElementById('epList').innerHTML =
-                '<div class="ep-loading"><div class="spinner" style="width:32px;height:32px;border-width:2px;margin-bottom:10px"></div>جاري جلب الحلقات...</div>';
+        // ── PLAYER ──
+        async function openSeries(slug) {
+            const series = allData.find(s => s.slug === slug);
+            if (!series) return;
 
-            showOverlay('جاري تحميل الحلقات...', 'spin');
-            stopHls();
-
-            document.getElementById('backdrop').classList.add('open');
+            document.getElementById('mTitle').textContent = series.title;
+            document.getElementById('mPoster').src = series.image;
+            document.getElementById('epList').innerHTML = '<p style="text-align:center">جاري جلب الحلقات...</p>';
+            document.getElementById('playerModal').classList.add('open');
             document.body.style.overflow = 'hidden';
 
-            // Fetch episode list
             try {
-                const r = await fetch(`${API}/api/episodes?slug=${currentSlug}`);
-                const d = await r.json();
-                const eps = d.episodes || [];
-                if (eps.length === 0) throw Error('no episodes');
-                renderEpisodes(eps);
-                // Auto-play first
-                playEpisode(eps[0].url, eps[0].title, 1, eps.length);
-            } catch (err) {
-                document.getElementById('epList').innerHTML =
-                    `<div class="ep-loading" style="color:rgba(255,100,100,.7)">تعذّر تحميل الحلقات<br><small>${err.message}</small></div>`;
-                // Fallback: play the series page directly
-                playEpisode(s.link, s.title, 1, 1);
+                const res = await fetch(`${API}/api/episodes?slug=${slug}`);
+                const data = await res.json();
+                const eps = data.episodes || [];
+
+                document.getElementById('epList').innerHTML = eps.map((ep, i) => `
+                    <button class="ep-item" onclick="playEpisode('${ep.url}', ${i + 1})" tabindex="0">
+                        <div class="ep-num">${i + 1}</div>
+                        <div class="ep-name">${ep.title}</div>
+                    </button>
+                `).join('');
+
+                if (eps.length > 0) playEpisode(eps[0].url, 1);
+            } catch (e) {
+                document.getElementById('epList').innerHTML = '<p>خطأ في جلب الحلقات</p>';
             }
         }
 
-        function renderEpisodes(eps) {
-            const list = document.getElementById('epList');
-            list.innerHTML = eps.map((e, i) => `
-    <div class="ep-item" id="epItem-${i}" onclick="playEpisode('${e.url.replace(/'/g, "\\'")}','${e.title.replace(/'/g, "\\'")}',${i + 1},${eps.length})">
-      <div class="ep-num">${i + 1}</div>
-      <div class="ep-name">${e.title || 'الحلقة ' + (i + 1)}</div>
-    </div>`).join('');
-        }
+        async function playEpisode(url, num) {
+            const overlay = document.getElementById('videoOverlay');
+            const vPlayer = document.getElementById('videoPlayer');
+            const status = document.getElementById('videoStatus');
 
-        // ── Play Episode ────────────────────────────────────────────────────────
-        async function playEpisode(epUrl, epTitle, epNum, total) {
-            if (currentEpUrl === epUrl) return;
-            currentEpUrl = epUrl;
+            overlay.style.opacity = '1';
+            status.textContent = "جاري استخراج رابط البث المباشر...";
 
-            document.getElementById('mEpLabel').textContent = `الحلقة ${epNum} / ${total}`;
-            // highlight active ep
-            document.querySelectorAll('.ep-item').forEach(el => el.classList.remove('active'));
-            const active = document.getElementById(`epItem-${epNum - 1}`);
-            if (active) { active.classList.add('active'); active.scrollIntoView({ behavior: 'smooth', block: 'nearest' }) }
-
-            showOverlay('جاري استخراج الفيديو...', 'spin');
-            stopHls();
+            if (hls) { hls.destroy(); hls = null; }
+            vPlayer.pause();
+            vPlayer.src = "";
 
             try {
-                const r = await fetch(`${API}/api/stream?url=${encodeURIComponent(epUrl)}`);
-                const d = await r.json();
-                if (!d.url) throw Error('no video url returned');
-                startPlayback(d.url, epUrl);
-            } catch (err) {
-                showOverlay(`تعذّر تحميل الحلقة\n${err.message}`, 'err', epUrl);
+                const res = await fetch(`${API}/api/stream?url=${encodeURIComponent(url)}`);
+                const data = await res.json();
+
+                if (data.url) {
+                    if (data.url.includes('.m3u8')) {
+                        if (Hls.isSupported()) {
+                            hls = new Hls();
+                            hls.loadSource(data.url);
+                            hls.attachMedia(vPlayer);
+                            hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                                overlay.style.opacity = '0';
+                                vPlayer.play();
+                            });
+                        } else if (vPlayer.canPlayType('application/vnd.apple.mpegurl')) {
+                            vPlayer.src = data.url;
+                            vPlayer.play();
+                            overlay.style.opacity = '0';
+                        }
+                    } else {
+                        vPlayer.src = data.url;
+                        vPlayer.oncanplay = () => {
+                            overlay.style.opacity = '0';
+                            vPlayer.play();
+                        };
+                    }
+                } else {
+                    status.textContent = "⚠️ عذراً، لا يمكن تشغيل هذا الفيديو حالياً";
+                }
+            } catch (e) {
+                status.textContent = "⚠️ خطأ في الاتصال بالسحاب";
             }
         }
 
-        function startPlayback(videoUrl, fallbackUrl) {
-            const vid = document.getElementById('vid');
-            stopHls();
-
-            const isHls = videoUrl.includes('.m3u8');
-            if (isHls && Hls.isSupported()) {
-                hls = new Hls({ maxBufferLength: 30, enableWorker: true });
-                hls.loadSource(videoUrl);
-                hls.attachMedia(vid);
-                hls.on(Hls.Events.MANIFEST_PARSED, () => { hideOverlay(); vid.play().catch(() => { }) });
-                hls.on(Hls.Events.ERROR, (_, d) => { if (d.fatal) showOverlay('خطأ في تحميل الفيديو', 'err', fallbackUrl) });
-            } else if (isHls && vid.canPlayType('application/vnd.apple.mpegurl')) {
-                vid.src = videoUrl;
-                vid.addEventListener('loadedmetadata', () => { hideOverlay(); vid.play() }, { once: true });
-            } else {
-                vid.src = videoUrl;
-                vid.addEventListener('canplay', () => { hideOverlay(); vid.play() }, { once: true });
-                vid.addEventListener('error', () => showOverlay('تعذّر تشغيل الفيديو', 'err', fallbackUrl), { once: true });
-            }
-        }
-
-        function stopHls() {
-            if (hls) { hls.destroy(); hls = null }
-            const v = document.getElementById('vid');
-            v.pause(); v.src = ''; v.load();
-        }
-
-        // ── Overlay ─────────────────────────────────────────────────────────────
-        function showOverlay(msg, type, fallback) {
-            const o = document.getElementById('vidOverlay');
-            const sp = document.getElementById('vidSpinner');
-            const m = document.getElementById('vidMsg');
-            o.classList.remove('hidden');
-            sp.style.display = type === 'spin' ? 'block' : 'none';
-            if (type === 'err') {
-                m.innerHTML = `<span class="vid-err">⚠️ ${msg}</span>
-      ${fallback ? `<a href="${fallback}" target="_blank" class="btn-ext">
-        <svg viewBox="0 0 24 24" width="18" height="18" fill="#07070f"><path d="M8 5v14l11-7z"/></svg>
-        افتح في الموقع</a>`: ''}`;
-            } else {
-                m.innerHTML = `<span class="vid-msg">${msg}</span>`;
-            }
-        }
-        function hideOverlay() { document.getElementById('vidOverlay').classList.add('hidden') }
-
-        // ── Close ────────────────────────────────────────────────────────────────
-        function closePlayer() {
-            document.getElementById('backdrop').classList.remove('open');
+        document.getElementById('closeBtn').onclick = () => {
+            document.getElementById('playerModal').classList.remove('open');
             document.body.style.overflow = '';
-            stopHls();
-            setTimeout(() => { currentEpUrl = ''; hideOverlay(); }, 350);
-        }
-        document.getElementById('closeBtn').onclick = closePlayer;
-        document.getElementById('backdrop').addEventListener('click', e => { if (e.target === e.currentTarget) closePlayer() });
-        document.addEventListener('keydown', e => { if (e.key === 'Escape') closePlayer() });
+            document.getElementById('videoPlayer').pause();
+            if (hls) { hls.destroy(); hls = null; }
+        };
 
-        // ── Init ─────────────────────────────────────────────────────────────────
-        loadData();
-        setInterval(loadData, 5 * 60 * 1000);
+        // TV DPAD NAVIGATION
+        window.addEventListener('keydown', (e) => {
+            if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+                // Future: Add focus management logic if needed, browsing works with browser default focus
+            }
+            if (e.key === 'Escape') document.getElementById('closeBtn').click();
+        });
+
+        init();
     </script>
 </body>
 
