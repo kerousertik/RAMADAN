@@ -619,7 +619,7 @@
     <div id="bgGlow"></div>
 
     <div id="splash">
-        <img src="logo.svg" class="splash-logo" alt="Karas">
+        <img src="logo.png" class="splash-logo" alt="Karas">
         <div style="font-size: 4rem; font-weight: 900; color: var(--gold); margin-top: 20px;">KARAS</div>
         <div style="font-size: 1.2rem; opacity: 0.5; margin-top: 10px; letter-spacing: 2px;">ULTRA PREMIUM</div>
         <div
@@ -647,7 +647,7 @@
 
         <main id="main">
             <div class="top-bar">
-                <img src="logo.svg" style="height: 60px;" alt="">
+                <img src="logo.png" style="height: 60px;" alt="">
                 <div class="search-container">
                     <span class="search-icon">🔍</span>
                     <input type="text" id="searchInput" placeholder="ابحث عن مسلسلك..." tabindex="0">
@@ -732,7 +732,11 @@
                 setTimeout(() => {
                     document.getElementById('splash').style.opacity = '0';
                     document.getElementById('app').style.opacity = '1';
-                    setTimeout(() => document.getElementById('splash').remove(), 1500);
+                    document.getElementById('splash').style.pointerEvents = 'none';
+                    setTimeout(() => {
+                        document.getElementById('splash').style.display = 'none';
+                        document.getElementById('splash').remove();
+                    }, 1500);
                 }, 1500);
             } catch (e) {
                 console.error(e);
@@ -796,15 +800,37 @@
         function renderCard(s) {
             const isFav = watchlist.includes(s.slug);
             return `
-                <div class="card focusable" tabindex="0" onclick="openSeries('${s.slug}')">
-                    <img src="${s.image}" onerror="this.src='logo.svg'">
+                <button class="card series-trigger focusable" data-slug="${s.slug}" tabindex="0">
+                    <img src="${s.image}" onerror="this.src='logo.png'">
                     <div class="card-fav ${isFav ? 'active' : ''}">★</div>
                     <div class="card-overlay">
                         <div class="card-name">${s.title}</div>
                     </div>
-                </div>
+                </button>
             `;
         }
+
+        // Global Event Delegation for Cards (More reliable on Mobile/TV)
+        document.addEventListener('click', (e) => {
+            const card = e.target.closest('.series-trigger');
+            if (card) {
+                e.preventDefault();
+                const slug = card.getAttribute('data-slug');
+                if (slug) openSeries(slug);
+            }
+        });
+
+        // Keyboard Support (Enter/Space)
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                const card = document.activeElement.closest('.series-trigger');
+                if (card) {
+                    e.preventDefault();
+                    const slug = card.getAttribute('data-slug');
+                    if (slug) openSeries(slug);
+                }
+            }
+        });
 
         // ── WATCHLIST LOGIC ──
         function toggleWatchlist(slug, btn) {

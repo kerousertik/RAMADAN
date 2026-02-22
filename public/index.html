@@ -11,8 +11,8 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="رمضان 2026">
-    <link rel="apple-touch-icon" href="/logo.svg?v=2">
-    <link rel="icon" type="image/svg+xml" href="/logo.svg?v=2">
+    <link rel="apple-touch-icon" href="/logo.png?v=3">
+    <link rel="icon" type="image/png" href="/logo.png?v=3">
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
     <!-- HLS.js for m3u8 streams -->
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest/dist/hls.min.js"></script>
@@ -741,7 +741,10 @@
             const removeSplash = () => {
                 splash.style.opacity = '0';
                 splash.style.pointerEvents = 'none';
-                setTimeout(() => splash.remove(), 800);
+                setTimeout(() => {
+                    splash.style.display = 'none';
+                    splash.remove();
+                }, 800);
             };
 
             // Failsafe: Remove splash after 5 seconds regardless of API
@@ -787,15 +790,15 @@
                 return;
             }
             grid.innerHTML = series.map((s, i) => `
-                <div class="card series-trigger" data-slug="${s.slug}" tabindex="0" style="animation-delay: ${i * 0.05}s">
+                <button class="card series-trigger" data-slug="${s.slug}" tabindex="0" style="animation-delay: ${i * 0.05}s">
                     <div class="card-img">
-                        <img src="${s.image}" alt="${s.title}" loading="lazy" onerror="this.src='/logo.svg'">
+                        <img src="${s.image}" alt="${s.title}" loading="lazy" onerror="this.src='/logo.png'">
                         <div class="play-overlay"><div class="play-circle">▶</div></div>
                     </div>
                     <div class="card-meta">
                         <div class="card-title">${s.title}</div>
                     </div>
-                </div>
+                </button>
             `).join('');
         }
 
@@ -803,8 +806,21 @@
         document.addEventListener('click', (e) => {
             const card = e.target.closest('.series-trigger');
             if (card) {
+                e.preventDefault();
                 const slug = card.getAttribute('data-slug');
                 if (slug) openSeries(slug);
+            }
+        });
+
+        // Keyboard Support for Cards (Enter/Space)
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                const card = document.activeElement.closest('.series-trigger');
+                if (card) {
+                    e.preventDefault();
+                    const slug = card.getAttribute('data-slug');
+                    if (slug) openSeries(slug);
+                }
             }
         });
 
