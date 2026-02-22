@@ -713,6 +713,19 @@
         // ── INITIALIZATION ──
         async function init() {
             watchlist = JSON.parse(localStorage.getItem('watchlist') || '[]');
+            const splash = document.getElementById('splash');
+            const removeSplash = () => {
+                splash.style.opacity = '0';
+                splash.style.pointerEvents = 'none';
+                setTimeout(() => {
+                    splash.style.display = 'none';
+                    splash.remove();
+                }, 1500);
+            };
+
+            // Failsafe: Remove splash after 5s
+            setTimeout(removeSplash, 5000);
+
             try {
                 const res = await fetch(`${API}/api/data?v=${Date.now()}`);
                 const data = await res.json();
@@ -726,21 +739,15 @@
                     const feat = allData[Math.floor(Math.random() * allData.length)];
                     updateHero(feat);
                 }
-
                 renderRows();
 
-                setTimeout(() => {
-                    document.getElementById('splash').style.opacity = '0';
-                    document.getElementById('app').style.opacity = '1';
-                    document.getElementById('splash').style.pointerEvents = 'none';
-                    setTimeout(() => {
-                        document.getElementById('splash').style.display = 'none';
-                        document.getElementById('splash').remove();
-                    }, 1500);
-                }, 1500);
             } catch (e) {
                 console.error(e);
-                setTimeout(init, 5000);
+            } finally {
+                setTimeout(() => {
+                    document.getElementById('app').style.opacity = '1';
+                    removeSplash();
+                }, 1500);
             }
         }
 

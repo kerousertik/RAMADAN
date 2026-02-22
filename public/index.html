@@ -766,11 +766,11 @@
                 allData = data.series || [];
                 document.getElementById('heroStats').textContent = `تنبيه: ${data.total} مسلسل متوفر حالياً`;
                 renderGrid(allData);
-                removeSplash();
             } catch (e) {
-                console.error(e);
-                removeSplash();
+                console.error("❌ Link failure:", e);
                 setTimeout(init, 5000);
+            } finally {
+                removeSplash();
             }
         }
 
