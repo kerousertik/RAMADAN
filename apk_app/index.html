@@ -58,7 +58,7 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            transition: opacity 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: opacity 0.8s ease-out;
         }
 
         .splash-logo {
@@ -92,15 +92,14 @@
         /* ── SIDEBAR ── */
         aside {
             width: 80px;
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(50px);
+            background: rgba(10, 10, 20, 0.98);
             border-left: 1px solid var(--border);
             display: flex;
             flex-direction: column;
             align-items: center;
             padding: 40px 0;
             z-index: 100;
-            transition: width 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+            transition: width 0.3s;
         }
 
         aside:hover,
@@ -209,14 +208,14 @@
         /* HERO AREA */
         .hero {
             position: relative;
-            height: 70vh;
-            margin: 0 60px 50px;
-            border-radius: 30px;
+            height: 60vh;
+            margin: 0 40px 30px;
+            border-radius: 20px;
             overflow: hidden;
             display: flex;
             align-items: flex-end;
-            padding: 60px;
-            box-shadow: 0 50px 100px rgba(0, 0, 0, 0.9);
+            padding: 40px;
+            background: #000;
         }
 
         .hero-bg {
@@ -231,7 +230,7 @@
             content: '';
             position: absolute;
             inset: 0;
-            background: linear-gradient(to top, var(--dark) 0%, transparent 70%), linear-gradient(to right, rgba(0, 0, 0, 1) 0%, transparent 60%);
+            background: linear-gradient(to top, var(--dark), transparent);
         }
 
         .hero-content {
@@ -375,10 +374,9 @@
 
         .card:focus,
         .card:hover {
-            scale: 1.1;
+            scale: 1.05;
             z-index: 10;
             border-color: var(--gold);
-            box-shadow: 0 40px 80px rgba(0, 0, 0, 0.9);
         }
 
         .card img {
