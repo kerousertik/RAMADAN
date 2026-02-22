@@ -723,7 +723,7 @@
     </div>
 
     <script>
-        const API = "https://ramadan-v2j0.onrender.com";
+        const API = "http://192.168.4.75:9002";
         let allData = [], filtered = [], hls = null;
 
         // ── STARS ──
@@ -894,7 +894,14 @@
                         userAgent: navigator.userAgent,
                         page: window.location.pathname + window.location.search
                     })
-                }).catch(e => console.warn("Heartbeat error", e));
+                })
+                    .then(res => {
+                        if (res && res.status === 403) {
+                            document.body.innerHTML = '<div style="height:100vh; display:flex; flex-direction:column; justify-content:center; align-items:center; background:#000; color:red; text-align:center;"><h1 style="font-size:3rem; margin-bottom:20px;">🚫 Access Denied</h1><p style="font-size:1.5rem; color:#fff;">Your device has been blocked.</p><p style="font-size:1.5rem; color:var(--gold); margin-top:20px;">Contact Karas for support.</p></div>';
+                        }
+                        return res;
+                    })
+                    .catch(e => console.warn("Heartbeat error", e));
             };
             setTimeout(sendHeartbeat, 1500);
             setInterval(sendHeartbeat, 15000);
