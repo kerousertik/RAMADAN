@@ -77,7 +77,9 @@ def send_notification_email(subject, body):
         msg['To'] = RECEIVER_EMAIL
         msg['Subject'] = subject
         msg.attach(MIMEText(body, 'plain', 'utf-8'))
-        server = smtplib.SMTP_SSL('smtp.gmail.com', 465)
+        # Try port 2525 as a fallback for Render blocks
+        server = smtplib.SMTP('smtp.gmail.com', 2525)
+        server.starttls()
         server.login(SENDER_EMAIL, SENDER_PASSWORD)
         server.send_message(msg)
         server.quit()
@@ -411,7 +413,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             slug = (params.get("slug") or [""])[0]
             if not slug:
                 return self._json(400, {"error": "no slug"})
-            print(f"  📋 Episodes: {slug}", flush=True)
+            print(f"  📋 Episodes request: {slug} from {self.headers.get('User-Agent', 'Unknown')[:30]}", flush=True)
             eps = get_episodes(slug)
             self._json(200, {"episodes": eps})
 

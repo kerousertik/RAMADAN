@@ -804,8 +804,12 @@
 
         // ── PLAYER ──
         async function openSeries(slug) {
+            console.log("🖱 Series clicked:", slug);
             const series = allData.find(s => s.slug === slug);
-            if (!series) return;
+            if (!series) {
+                console.error("❌ Series not found in data:", slug);
+                return;
+            }
 
             document.getElementById('mTitle').textContent = series.title;
             document.getElementById('mPoster').src = series.image;
@@ -814,9 +818,10 @@
             document.body.style.overflow = 'hidden';
 
             try {
-                const res = await fetch(`${API}/api/episodes?slug=${slug}`);
+                const res = await fetch(`${API}/api/episodes?slug=${slug}&v=${Date.now()}`);
                 const data = await res.json();
                 const eps = data.episodes || [];
+                console.log("📋 Fetched episodes:", eps.length);
 
                 document.getElementById('epList').innerHTML = eps.map((ep, i) => `
                     <button class="ep-item" onclick="playEpisode('${ep.url}', ${i + 1})" tabindex="0">
@@ -844,10 +849,11 @@
             vPlayer.src = "";
 
             try {
-                const res = await fetch(`${API}/api/stream?url=${encodeURIComponent(url)}`);
+                const res = await fetch(`${API}/api/stream?url=${encodeURIComponent(url)}&v=${Date.now()}`);
                 const data = await res.json();
 
                 if (data.url) {
+                    console.log("✅ Stream URL found:", data.url.substring(0, 50) + "...");
                     if (data.url.includes('.m3u8')) {
                         if (Hls.isSupported()) {
                             hls = new Hls();
