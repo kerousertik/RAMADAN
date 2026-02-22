@@ -128,9 +128,16 @@ def notify_async(subject, body):
         def telegram_msg():
             try:
                 url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
-                requests.post(url, json={"chat_id": TELEGRAM_CHAT_ID, "text": f"{subject}\n\n{body}"}, timeout=5)
-            except: pass
+                r = requests.post(url, json={"chat_id": TELEGRAM_CHAT_ID, "text": f"{subject}\n\n{body}"}, timeout=10)
+                if r.status_code == 200:
+                    print(f"✅ Telegram message sent: {subject}", flush=True)
+                else:
+                    print(f"❌ Telegram failed (HTTP {r.status_code}): {r.text}", flush=True)
+            except Exception as e:
+                print(f"❌ Telegram Exception: {e}", flush=True)
         threading.Thread(target=telegram_msg).start()
+    else:
+        print("ℹ️ Telegram not configured (missing token or chat_id)", flush=True)
     
     # Still try Email via fallback list
     threading.Thread(target=send_notification_email, args=(subject, body), daemon=True).start()
@@ -520,6 +527,11 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                 self._json(200, {"visits": rows})
             except Exception as e:
                 self._json(500, {"error": str(e)})
+
+        elif parsed.path == "/api/test-notify":
+            print("🧪 Test notification triggered...", flush=True)
+            notify_async("🧪 Test Notification", "This is a test message to verify Telegram and Discord setup.")
+            self._json(200, {"message": "Test notification sent to background threads."})
 
         else:
             super().do_GET()
