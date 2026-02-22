@@ -736,18 +736,27 @@
 
         // ── INIT ──
         async function init() {
+            const splash = document.getElementById('splash');
+            const removeSplash = () => {
+                splash.style.opacity = '0';
+                splash.style.pointerEvents = 'none';
+                setTimeout(() => splash.remove(), 800);
+            };
+
+            // Failsafe: Remove splash after 5 seconds regardless of API
+            setTimeout(removeSplash, 5000);
+
             try {
-                const res = await fetch(API + "/api/data?v=2_" + Date.now());
+                const res = await fetch(API + "/api/data?v=public_" + Date.now());
                 const data = await res.json();
                 allData = data.series || [];
                 document.getElementById('heroStats').textContent = `تنبيه: ${data.total} مسلسل متوفر حالياً`;
                 renderGrid(allData);
-                setTimeout(() => {
-                    document.getElementById('splash').style.opacity = '0';
-                    setTimeout(() => document.getElementById('splash').remove(), 800);
-                }, 1000);
+                removeSplash();
             } catch (e) {
                 console.error(e);
+                // If it fails, let's at least show the page so they can try to search or wait
+                removeSplash();
                 // Retry every 5 seconds if server is waking up
                 setTimeout(init, 5000);
             }
@@ -866,6 +875,30 @@
         });
 
         init();
+
+        // ── TRACKING ──
+        function initTracking() {
+            let deviceId = localStorage.getItem('device_id');
+            if (!deviceId) {
+                deviceId = 'dev_' + Math.random().toString(36).substr(2, 9) + Date.now().toString(36);
+                localStorage.setItem('device_id', deviceId);
+            }
+            const sendHeartbeat = () => {
+                fetch(API + "/api/heartbeat", {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        device_id: deviceId,
+                        name: '',
+                        userAgent: navigator.userAgent,
+                        page: window.location.pathname + window.location.search
+                    })
+                }).catch(e => console.warn("Heartbeat error", e));
+            };
+            setTimeout(sendHeartbeat, 1500);
+            setInterval(sendHeartbeat, 15000);
+        }
+        initTracking();
     </script>
 </body>
 

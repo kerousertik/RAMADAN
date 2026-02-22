@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة تحكم الزوار</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+            background: #07070f;
+            color: #fff;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1,
+        h2 {
+            color: #d4a534;
+        }
+
+        .tabs {
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            background: #1a1a2e;
+            border: 1px solid #d4a534;
+            color: #fff;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 5px;
+            margin-left: 10px;
+        }
+
+        .tab.active {
+            background: #d4a534;
+            color: #000;
+            font-weight: bold;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        th,
+        td {
+            padding: 12px;
+            text-align: right;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        th {
+            background: rgba(212, 165, 52, 0.2);
+            color: #d4a534;
+        }
+
+        .online {
+            color: #00ff00;
+            font-weight: bold;
+        }
+
+        .offline {
+            color: #aaaaaa;
+        }
+
+        .panel {
+            display: none;
+        }
+
+        .panel.active {
+            display: block;
+        }
+
+        tr:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .meta {
+            font-size: 0.8em;
+            color: #aaa;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>لوحة تحكم الزوار</h1>
+    <div class="tabs">
+        <button class="tab active" onclick="showPanel('devices', event)">الأجهزة المتصلة</button>
+        <button class="tab" onclick="showPanel('visits', event)">سجل الزيارات</button>
+        <button class="tab" onclick="refreshData()" style="background:#444;border-color:#666;">🔄 تحديث
+            البيانات</button>
+    </div>
+
+    <div id="devices" class="panel active">
+        <h2>الأجهزة المتصلة</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>الحالة</th>
+                    <th>Device ID</th>
+                    <th>IP</th>
+                    <th>آخر ظهور</th>
+                    <th>الصفحة الحالية</th>
+                    <th>عدد الزيارات</th>
+                    <th>أول ظهور</th>
+                    <th>المتصفح/الجهاز</th>
+                </tr>
+            </thead>
+            <tbody id="devices-body">
+                <tr>
+                    <td colspan="8" style="text-align:center;">جاري التحميل...</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div id="visits" class="panel">
+        <h2>أحدث الزيارات (آخر 200)</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>الوقت</th>
+                    <th>Device ID</th>
+                    <th>IP</th>
+                    <th>الصفحة</th>
+                    <th>المتصفح/الجهاز</th>
+                </tr>
+            </thead>
+            <tbody id="visits-body">
+                <tr>
+                    <td colspan="5" style="text-align:center;">جاري التحميل...</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        const API = "";
+
+        function showPanel(id, ev) {
+            document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            if (ev) ev.target.classList.add('active');
+            if (id === 'visits' && document.getElementById('visits-body').innerHTML.includes('جاري التحميل')) {
+                loadVisits();
+            }
+        }
+
+        function formatDate(isoStr) {
+            try {
+                if (!isoStr) return '-';
+                const d = new Date(isoStr);
+                if (isNaN(d.getTime())) return isoStr;
+                return d.toLocaleString('ar-EG');
+            } catch (e) { return isoStr; }
+        }
+
+        async function loadDevices() {
+            try {
+                const res = await fetch(API + '/api/dashboard/devices');
+                const data = await res.json();
+                const tbody = document.getElementById('devices-body');
+                if (data.devices && data.devices.length > 0) {
+                    tbody.innerHTML = data.devices.map(d => `
+                        <tr>
+                            <td class="\${d.status === 'Online' ? 'online' : 'offline'}">\${d.status === 'Online' ? 'متصل الآن 🟢' : 'غير متصل ⚪'}</td>
+                            <td style="font-family:monospace">\${d.device_id.substring(0,8)}...</td>
+                            <td dir="ltr" style="text-align:right">\${d.ip}</td>
+                            <td dir="ltr" style="text-align:right">\${formatDate(d.last_seen)}</td>
+                            <td dir="ltr" style="text-align:right">\${d.last_page || '-'}</td>
+                            <td>\${d.visits_count}</td>
+                            <td dir="ltr" style="text-align:right" class="meta">\${formatDate(d.first_seen)}</td>
+                            <td class="meta" dir="ltr" style="text-align:right;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="\${d.user_agent}">\${d.user_agent}</td>
+                        </tr>
+                    `).join('');
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;">لا يوجد أجهزة مسجلة بعد</td></tr>';
+                }
+            } catch (e) {
+                console.error(e);
+                document.getElementById('devices-body').innerHTML = '<tr><td colspan="8" style="text-align:center;color:red;">خطأ في جلب البيانات من السيرفر</td></tr>';
+            }
+        }
+
+        async function loadVisits() {
+            try {
+                const res = await fetch(API + '/api/dashboard/visits');
+                const data = await res.json();
+                const tbody = document.getElementById('visits-body');
+                if (data.visits && data.visits.length > 0) {
+                    tbody.innerHTML = data.visits.map(v => `
+                        <tr>
+                            <td dir="ltr" style="text-align:right">\${formatDate(v.time)}</td>
+                            <td style="font-family:monospace">\${v.device_id.substring(0,8)}...</td>
+                            <td dir="ltr" style="text-align:right">\${v.ip}</td>
+                            <td dir="ltr" style="text-align:right">\${v.page}</td>
+                            <td class="meta" dir="ltr" style="text-align:right;max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="\${v.user_agent}">\${v.user_agent}</td>
+                        </tr>
+                    `).join('');
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">لا يوجد سجل زيارات بعد</td></tr>';
+                }
+            } catch (e) {
+                console.error(e);
+                document.getElementById('visits-body').innerHTML = '<tr><td colspan="5" style="text-align:center;color:red;">خطأ في جلب البيانات من السيرفر</td></tr>';
+            }
+        }
+
+        function refreshData() {
+            loadDevices();
+            if (document.getElementById('visits').classList.contains('active')) {
+                loadVisits();
+            }
+        }
+
+        // Init
+        loadDevices();
+        setInterval(loadDevices, 15000); // Auto-refresh devices every 15s
+    </script>
+</body>
+
+</html>

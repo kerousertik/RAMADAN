@@ -3,11 +3,74 @@ Ramadan 2026 - Production Server by Karas
 Works locally & on Railway/Render/Fly.io
 """
 
-import json, os, sys, re, random, time, threading
-import http.server, socketserver, urllib.parse, requests
-from bs4 import BeautifulSoup
-from urllib.parse import urljoin
 from datetime import datetime
+import os, json, time, threading, datetime as dt
+import sqlite3
+import smtplib
+import base64
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+
+DB_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "visitors.db")
+ADMIN_USER = os.environ.get("ADMIN_USER", "admin")
+ADMIN_PASS = os.environ.get("ADMIN_PASS", "komo2026")
+
+def init_db():
+    conn = sqlite3.connect(DB_FILE)
+    c = conn.cursor()
+    c.execute('''CREATE TABLE IF NOT EXISTS visitors (
+        device_id TEXT PRIMARY KEY,
+        ip TEXT,
+        name TEXT,
+        user_agent TEXT,
+        first_seen DATETIME,
+        last_seen DATETIME,
+        last_page TEXT,
+        visits_count INTEGER
+    )''')
+    c.execute('''CREATE TABLE IF NOT EXISTS visits_log (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        device_id TEXT,
+        ip TEXT,
+        name TEXT,
+        user_agent TEXT,
+        page TEXT,
+        time DATETIME
+    )''')
+    conn.commit()
+    conn.close()
+
+init_db()
+
+SENDER_EMAIL = os.environ.get("SENDER_EMAIL", "komonashat222@gmail.com")
+SENDER_PASSWORD = os.environ.get("SENDER_PASSWORD", "srckjctweknkuuwk")
+RECEIVER_EMAIL = SENDER_EMAIL
+
+def send_notification_email(subject, body):
+    try:
+        msg = MIMEMultipart()
+        msg['From'] = SENDER_EMAIL
+        msg['To'] = RECEIVER_EMAIL
+        msg['Subject'] = subject
+        msg.attach(MIMEText(body, 'plain', 'utf-8'))
+        server = smtplib.SMTP('smtp.gmail.com', 587)
+        server.starttls()
+        server.login(SENDER_EMAIL, SENDER_PASSWORD)
+        server.send_message(msg)
+        server.quit()
+        print(f"📧 Email sent: {subject}", flush=True)
+    except Exception as e:
+        print(f"❌ Email error: {e}", flush=True)
+
+def notify_async(subject, body):
+    threading.Thread(target=send_notification_email, args=(subject, body), daemon=True).start()
+
+def get_client_ip(headers, client_address):
+    x_forwarded_for = headers.get('X-Forwarded-For')
+    if x_forwarded_for:
+        return x_forwarded_for.split(',')[0].strip()
+    return client_address[0]
+
 
 BASE = "https://a.alooytv7.xyz"
 PORT = int(os.environ.get("PORT", 9002))
@@ -241,6 +304,24 @@ def scrape_all():
 
 class Handler(http.server.SimpleHTTPRequestHandler):
 
+    def require_auth(self):
+        auth_header = self.headers.get('Authorization')
+        if auth_header:
+            try:
+                auth_type, encoded_creds = auth_header.split(' ', 1)
+                if auth_type.lower() == 'basic':
+                    creds = base64.b64decode(encoded_creds).decode('utf-8')
+                    user, pw = creds.split(':', 1)
+                    if user == ADMIN_USER and pw == ADMIN_PASS:
+                        return False
+            except Exception:
+                pass
+        self.send_response(401)
+        self.send_header('WWW-Authenticate', 'Basic realm="Admin Dashboard"')
+        self.end_headers()
+        self.wfile.write(b'Unauthorized Access')
+        return True
+
     def do_OPTIONS(self):
         self.send_response(200)
         self._cors()
@@ -249,6 +330,20 @@ class Handler(http.server.SimpleHTTPRequestHandler):
     def do_GET(self):
         parsed = urllib.parse.urlparse(self.path)
         params = urllib.parse.parse_qs(parsed.query)
+
+        if parsed.path == "/admin":
+            if self.require_auth(): return
+            dash_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "dashboard.html")
+            try:
+                with open(dash_path, "r", encoding="utf-8") as f:
+                    html = f.read()
+                self.send_response(200)
+                self.send_header("Content-Type", "text/html; charset=utf-8")
+                self.end_headers()
+                self.wfile.write(html.encode("utf-8"))
+            except Exception as e:
+                self._json(500, {"error": str(e)})
+            return
 
         if parsed.path == "/api/data":
             body = json.dumps(_cache, ensure_ascii=False).encode("utf-8")
@@ -278,12 +373,104 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                 self._json(200, {"url": video_url})
             else:
                 self._json(500, {"error": "video not found"})
+
+        elif parsed.path == "/api/dashboard/devices":
+            if self.require_auth(): return
+            try:
+                conn = sqlite3.connect(DB_FILE)
+                conn.row_factory = sqlite3.Row
+                c = conn.cursor()
+                c.execute("SELECT * FROM visitors ORDER BY last_seen DESC")
+                rows = [dict(r) for r in c.fetchall()]
+                conn.close()
+                now = datetime.now()
+                for r in rows:
+                    try:
+                        last = datetime.fromisoformat(r['last_seen'])
+                        r['status'] = 'Online' if (now - last).total_seconds() <= 30 else 'Offline'
+                    except:
+                        r['status'] = 'Unknown'
+                self._json(200, {"devices": rows})
+            except Exception as e:
+                self._json(500, {"error": str(e)})
+
+        elif parsed.path == "/api/dashboard/visits":
+            if self.require_auth(): return
+            try:
+                conn = sqlite3.connect(DB_FILE)
+                conn.row_factory = sqlite3.Row
+                c = conn.cursor()
+                c.execute("SELECT * FROM visits_log ORDER BY id DESC LIMIT 200")
+                rows = [dict(r) for r in c.fetchall()]
+                conn.close()
+                self._json(200, {"visits": rows})
+            except Exception as e:
+                self._json(500, {"error": str(e)})
+
         else:
             super().do_GET()
 
+    def do_POST(self):
+        parsed = urllib.parse.urlparse(self.path)
+        if parsed.path == "/api/heartbeat":
+            try:
+                content_length = int(self.headers.get('Content-Length', 0))
+                post_data = self.rfile.read(content_length)
+                data = json.loads(post_data.decode('utf-8'))
+                device_id = data.get('device_id', 'unknown')
+                name = data.get('name', '')
+                user_agent = data.get('userAgent', '')
+                page = data.get('page', '')
+                ip = get_client_ip(self.headers, self.client_address)
+                now = datetime.now()
+                now_iso = now.isoformat()
+                
+                conn = sqlite3.connect(DB_FILE)
+                c = conn.cursor()
+                
+                c.execute("SELECT first_seen, last_seen, visits_count FROM visitors WHERE device_id = ?", (device_id,))
+                row = c.fetchone()
+                
+                if not row:
+                    # New device
+                    c.execute('''INSERT INTO visitors (device_id, ip, name, user_agent, first_seen, last_seen, last_page, visits_count)
+                                 VALUES (?, ?, ?, ?, ?, ?, ?, 1)''', 
+                              (device_id, ip, name, user_agent, now_iso, now_iso, page))
+                    notify_async("🚨 جهاز جديد دخل الموقع", f"وقت الدخول: {now_iso}\nIP: {ip}\nDevice ID: {device_id}\nالصفحة: {page}\nالمتصفح: {user_agent}")
+                else:
+                    first_seen, last_seen, visits_count = row
+                    try:
+                        last_seen_dt = datetime.fromisoformat(last_seen)
+                    except Exception:
+                        last_seen_dt = now
+                        
+                    time_diff = (now - last_seen_dt).total_seconds()
+                    visits_count_new = visits_count
+                    
+                    if time_diff > 30 * 60: # 30 minutes
+                        notify_async("🔙 جهاز رجع للموقع", f"وقت الدخول: {now_iso}\nIP: {ip}\nDevice ID: {device_id}\nالصفحة: {page}\nالمتصفح: {user_agent}\nمدة الغياب: {int(time_diff/60)} دقيقة")
+                        visits_count_new += 1
+                        
+                    c.execute('''UPDATE visitors SET last_seen = ?, last_page = ?, ip = ?, user_agent = ?, visits_count = ? WHERE device_id = ?''',
+                              (now_iso, page, ip, user_agent, visits_count_new, device_id))
+                              
+                c.execute('''INSERT INTO visits_log (device_id, ip, name, user_agent, page, time)
+                             VALUES (?, ?, ?, ?, ?, ?)''', (device_id, ip, name, user_agent, page, now_iso))
+                             
+                conn.commit()
+                conn.close()
+                self._json(200, {"status": "ok"})
+            except Exception as e:
+                print(f"Error in heartbeat: {e}", flush=True)
+                self._json(500, {"error": str(e)})
+        else:
+            self.send_response(404)
+            self._cors()
+            self.end_headers()
+
     def _cors(self):
         self.send_header("Access-Control-Allow-Origin", "*")
-        self.send_header("Access-Control-Allow-Methods", "GET, OPTIONS")
+        self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
         self.send_header("Access-Control-Allow-Headers", "*")
 
     def _json(self, code, data):
