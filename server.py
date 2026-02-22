@@ -77,8 +77,7 @@ def send_notification_email(subject, body):
         msg['To'] = RECEIVER_EMAIL
         msg['Subject'] = subject
         msg.attach(MIMEText(body, 'plain', 'utf-8'))
-        server = smtplib.SMTP('smtp.gmail.com', 587)
-        server.starttls()
+        server = smtplib.SMTP_SSL('smtp.gmail.com', 465)
         server.login(SENDER_EMAIL, SENDER_PASSWORD)
         server.send_message(msg)
         server.quit()
