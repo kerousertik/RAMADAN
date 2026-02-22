@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Ramadan 2026 Ultra</title>
+    <title>Karas Ultra Edition</title>
     <link rel="icon" type="image/svg+xml" href="logo.svg">
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest/dist/hls.min.js"></script>
@@ -12,13 +12,12 @@
         :root {
             --gold: #d4a534;
             --gold-light: #f5c842;
-            --dark: #05050a;
-            --dark-2: #0a0a15;
-            --card: rgba(255, 255, 255, 0.05);
-            --border: rgba(255, 255, 255, 0.1);
-            --accent: #e50914;
-            /* Netflix-style hint */
-            --radius: 12px;
+            --dark: #020205;
+            --dark-2: #05050a;
+            --card: rgba(255, 255, 255, 0.03);
+            --border: rgba(255, 255, 255, 0.06);
+            --radius: 20px;
+            --bg-glow: #101025;
         }
 
         * {
@@ -34,17 +33,19 @@
             margin: 0;
             padding: 0;
             overflow: hidden;
-            /* We handle scrolling manually or via flex */
             height: 100vh;
             width: 100vw;
+            user-select: none;
+            transition: background 1s ease;
         }
 
-        /* ── BACKGROUND ── */
-        .bg-glow {
+        /* ── BACKGROUND GLOW ── */
+        #bgGlow {
             position: fixed;
             inset: 0;
-            background: radial-gradient(circle at 20% 30%, #1a1a35 0%, #05050a 60%);
+            background: radial-gradient(circle at 0% 0%, var(--bg-glow) 0%, var(--dark) 70%);
             z-index: -1;
+            transition: 1s ease;
         }
 
         /* ── SPLASH ── */
@@ -57,16 +58,16 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            transition: opacity 1s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: opacity 1.5s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .splash-logo {
             width: 180px;
-            height: 180px;
-            animation: breathe 3s infinite ease-in-out;
+            filter: drop-shadow(0 0 30px var(--gold));
+            animation: pulse 2s infinite;
         }
 
-        @keyframes breathe {
+        @keyframes pulse {
 
             0%,
             100% {
@@ -80,204 +81,220 @@
             }
         }
 
-        .loader-dots {
-            display: flex;
-            gap: 8px;
-            margin-top: 20px;
-        }
-
-        .dot {
-            width: 10px;
-            height: 10px;
-            background: var(--gold);
-            border-radius: 50%;
-            animation: dotJump 1.4s infinite;
-        }
-
-        .dot:nth-child(2) {
-            animation-delay: 0.2s;
-        }
-
-        .dot:nth-child(3) {
-            animation-delay: 0.4s;
-        }
-
-        @keyframes dotJump {
-
-            0%,
-            100% {
-                transform: translateY(0);
-            }
-
-            50% {
-                transform: translateY(-10px);
-            }
-        }
-
-        /* ── LAYOUT ── */
+        /* ── APP LAYOUT ── */
         #app {
             display: flex;
-            flex-direction: column;
             height: 100vh;
             opacity: 0;
             transition: opacity 1s;
         }
 
-        /* ── SIDEBAR (For TV Navigation) ── */
+        /* ── SIDEBAR ── */
         aside {
             width: 80px;
-            background: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(20px);
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(50px);
             border-left: 1px solid var(--border);
             display: flex;
             flex-direction: column;
             align-items: center;
             padding: 40px 0;
             z-index: 100;
-            transition: width 0.3s;
+            transition: width 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
         }
 
         aside:hover,
         aside:focus-within {
-            width: 200px;
+            width: 220px;
         }
 
         .nav-item {
             width: 100%;
-            height: 60px;
+            height: 70px;
             display: flex;
             align-items: center;
-            justify-content: center;
+            padding: 0 25px;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.3s;
             position: relative;
             color: rgba(255, 255, 255, 0.4);
+            white-space: nowrap;
+            gap: 20px;
         }
 
         .nav-item i {
-            font-size: 1.5rem;
+            font-size: 1.6rem;
+            min-width: 30px;
+            text-align: center;
         }
 
         .nav-label {
             opacity: 0;
-            position: absolute;
-            right: 80px;
             transition: 0.3s;
-            white-space: nowrap;
             font-weight: 700;
+            font-size: 1rem;
+            transform: translateX(10px);
         }
 
         aside:hover .nav-label {
             opacity: 1;
-            right: 60px;
+            transform: translateX(0);
         }
 
         .nav-item:focus,
         .nav-item.active {
             color: var(--gold);
             background: rgba(212, 165, 52, 0.1);
+            outline: none;
         }
 
         .nav-item:focus::before {
             content: '';
             position: absolute;
             right: 0;
-            height: 100%;
+            height: 50%;
+            top: 25%;
             width: 4px;
             background: var(--gold);
+            border-radius: 4px;
         }
 
         /* ── MAIN CONTENT ── */
         main {
             flex: 1;
-            padding: 0;
             overflow-y: auto;
             scroll-behavior: smooth;
+            padding-bottom: 200px;
         }
 
-        /* Hero Billboard */
+        /* TOP BAR */
+        .top-bar {
+            padding: 40px 60px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .search-container {
+            position: relative;
+            width: 350px;
+        }
+
+        #searchInput {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid var(--border);
+            border-radius: 50px;
+            padding: 12px 50px 12px 20px;
+            color: #fff;
+            font-family: inherit;
+            font-size: 1rem;
+            transition: 0.3s;
+        }
+
+        #searchInput:focus {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--gold);
+            width: 450px;
+        }
+
+        .search-icon {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            opacity: 0.5;
+        }
+
+        /* HERO AREA */
         .hero {
             position: relative;
             height: 70vh;
-            width: 100%;
+            margin: 0 60px 50px;
+            border-radius: 30px;
+            overflow: hidden;
             display: flex;
             align-items: flex-end;
             padding: 60px;
-            overflow: hidden;
+            box-shadow: 0 50px 100px rgba(0, 0, 0, 0.9);
         }
 
         .hero-bg {
             position: absolute;
             inset: 0;
-            z-index: 0;
             background-size: cover;
-            background-position: center;
-            transition: scale 5s;
-        }
-
-        .hero:hover .hero-bg {
-            scale: 1.1;
+            background-position: top center;
+            transition: transform 0.8s, opacity 0.8s;
         }
 
         .hero::after {
             content: '';
             position: absolute;
             inset: 0;
-            background: linear-gradient(to top, var(--dark) 10%, transparent 50%),
-                linear-gradient(to right, var(--dark) 0%, transparent 60%);
+            background: linear-gradient(to top, var(--dark) 0%, transparent 70%), linear-gradient(to right, rgba(0, 0, 0, 1) 0%, transparent 60%);
         }
 
         .hero-content {
             position: relative;
             z-index: 2;
-            max-width: 600px;
-            animation: fadeIn 1.2s;
+            max-width: 800px;
+            animation: slideUp 1s cubic-bezier(0.165, 0.84, 0.44, 1);
         }
 
-        @keyframes fadeIn {
+        @keyframes slideUp {
             from {
+                transform: translateY(50px);
                 opacity: 0;
-                transform: translateY(20px);
             }
 
             to {
-                opacity: 1;
                 transform: translateY(0);
+                opacity: 1;
             }
         }
 
         .hero-title {
-            font-size: 4rem;
+            font-size: 5.5rem;
             font-weight: 900;
             line-height: 1;
             margin: 0;
-            text-shadow: 0 4px 10px rgba(0, 0, 0, 0.8);
+            letter-spacing: -2px;
         }
 
         .hero-meta {
             color: var(--gold);
             font-weight: 700;
-            margin-top: 10px;
-            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .badge {
+            background: var(--gold);
+            color: #000;
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-weight: 900;
         }
 
         .hero-btns {
             display: flex;
-            gap: 15px;
-            margin-top: 30px;
+            gap: 20px;
+            margin-top: 50px;
         }
 
-        .btn-p {
-            padding: 12px 35px;
-            border-radius: 8px;
+        .btn {
+            padding: 18px 50px;
+            border-radius: 12px;
             font-weight: 900;
-            font-size: 1.1rem;
+            font-size: 1.3rem;
             border: none;
             cursor: pointer;
+            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             display: flex;
             align-items: center;
-            gap: 10px;
-            transition: 0.3s;
+            gap: 12px;
         }
 
         .btn-play {
@@ -287,41 +304,57 @@
 
         .btn-play:focus,
         .btn-play:hover {
+            scale: 1.1;
             background: var(--gold);
             color: #fff;
-            scale: 1.1;
+            box-shadow: 0 20px 40px rgba(212, 165, 52, 0.4);
         }
 
-        .btn-more {
-            background: rgba(255, 255, 255, 0.1);
+        .btn-list {
+            background: rgba(255, 255, 255, 0.08);
             color: #fff;
-            backdrop-filter: blur(10px);
+            backdrop-filter: blur(20px);
         }
 
-        .btn-more:focus {
+        .btn-list:focus {
             scale: 1.1;
-            background: rgba(255, 255, 255, 0.2);
+            background: var(--gold);
+            color: #000;
         }
 
-        /* Rows */
-        .rows-container {
-            padding: 40px 60px;
+        /* ROWS */
+        .row {
+            margin: 60px 0 0 60px;
+            transition: 0.5s;
+        }
+
+        .row-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-left: 60px;
+            margin-bottom: 25px;
         }
 
         .row-title {
-            font-size: 1.5rem;
+            font-size: 2.2rem;
             font-weight: 900;
-            margin-bottom: 20px;
-            padding-right: 10px;
-            border-right: 4px solid var(--gold);
+            color: #fff;
+        }
+
+        .row-title span {
+            color: var(--gold);
+            font-size: 1rem;
+            margin-right: 15px;
+            opacity: 0.6;
         }
 
         .row-scroller {
             display: flex;
-            gap: 20px;
+            gap: 30px;
             overflow-x: auto;
-            padding: 10px 0 40px;
-            scroll-snap-type: x mandatory;
+            padding: 20px 60px 60px 0;
+            scroll-behavior: smooth;
         }
 
         .row-scroller::-webkit-scrollbar {
@@ -329,25 +362,23 @@
         }
 
         .card {
-            flex: 0 0 240px;
+            flex: 0 0 300px;
             aspect-ratio: 2/3;
             border-radius: var(--radius);
             overflow: hidden;
-            background: var(--card);
-            border: 1px solid var(--border);
+            background: #111;
             cursor: pointer;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            scroll-snap-align: start;
+            transition: 0.5s cubic-bezier(0.165, 0.84, 0.44, 1);
             position: relative;
+            border: 2px solid transparent;
         }
 
         .card:focus,
         .card:hover {
             scale: 1.1;
-            border-color: var(--gold);
             z-index: 10;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
-            outline: 3px solid var(--gold);
+            border-color: var(--gold);
+            box-shadow: 0 40px 80px rgba(0, 0, 0, 0.9);
         }
 
         .card img {
@@ -359,10 +390,11 @@
         .card-overlay {
             position: absolute;
             inset: 0;
-            background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+            background: linear-gradient(to top, rgba(0, 0, 0, 1) 0%, transparent 50%);
             display: flex;
-            align-items: flex-end;
-            padding: 15px;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: 30px;
             opacity: 0;
             transition: 0.3s;
         }
@@ -373,143 +405,210 @@
         }
 
         .card-name {
-            font-weight: 700;
-            font-size: 0.95rem;
+            font-weight: 900;
+            font-size: 1.4rem;
+            line-height: 1.2;
         }
 
-        /* ── MODAL ── */
+        .card-fav {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-size: 1.8rem;
+            filter: drop-shadow(0 2px 10px #000);
+            transition: 0.3s;
+        }
+
+        .card-fav.active {
+            color: #e50914;
+            transform: scale(1.2);
+        }
+
+        /* PLAYER & MODAL */
         #modal {
             position: fixed;
             inset: 0;
             z-index: 2000;
-            background: black;
+            background: #000;
             display: none;
             flex-direction: column;
+            animation: modalEnter 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
         }
 
         #modal.open {
             display: flex;
         }
 
-        .modal-top {
-            height: 70%;
-            position: relative;
-            background: #000;
+        @keyframes modalEnter {
+            from {
+                opacity: 0;
+                transform: scale(1.1);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
         }
 
-        #videoOverlay {
-            position: absolute;
-            inset: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        .player-top {
+            flex: 1;
+            position: relative;
             background: #000;
-            z-index: 200;
-            transition: all 0.3s;
-            pointer-events: auto;
-            color: #fff;
         }
 
         #vPlayer {
             width: 100%;
             height: 100%;
-            z-index: 1;
+            position: relative;
+            z-index: 100;
         }
 
-        .modal-bottom {
-            height: 30%;
-            background: var(--dark-2);
+        #videoOverlay {
+            position: absolute;
+            inset: 0;
+            z-index: 150;
+            background: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .player-controls {
+            position: absolute;
+            top: 40px;
+            right: 40px;
+            z-index: 200;
+            display: flex;
+            gap: 20px;
+        }
+
+        .player-btn {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-weight: 900;
+            cursor: pointer;
+            backdrop-filter: blur(20px);
+        }
+
+        .player-btn:focus {
+            background: var(--gold);
+            color: #000;
+            scale: 1.1;
+        }
+
+        .player-bottom {
+            height: 260px;
+            background: #080808;
             border-top: 1px solid var(--border);
-            padding: 20px 40px;
+            padding: 40px 60px;
             overflow-x: auto;
             display: flex;
-            gap: 15px;
+            gap: 30px;
             align-items: center;
         }
 
         .ep-card {
-            flex: 0 0 160px;
-            height: 100px;
-            background: var(--card);
-            border-radius: 8px;
-            border: 1px solid var(--border);
+            flex: 0 0 250px;
+            height: 140px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 16px;
+            border: 2px solid transparent;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            font-weight: 700;
-            transition: 0.2s;
+            transition: 0.3s;
+            gap: 8px;
         }
 
         .ep-card:focus,
-        .ep-card:hover {
-            scale: 1.1;
+        .ep-card.active {
             background: var(--gold);
             color: #000;
+            border-color: var(--gold);
+            scale: 1.1;
             outline: none;
         }
 
-        .close-vid {
-            position: absolute;
-            top: 30px;
-            left: 30px;
-            z-index: 200;
-            background: rgba(0, 0, 0, 0.5);
-            color: white;
-            border: 1px solid white;
-            padding: 10px 20px;
-            border-radius: 50px;
-            cursor: pointer;
+        .ep-num {
+            font-size: 2.2rem;
             font-weight: 900;
         }
 
-        .close-vid:focus {
-            background: red;
-            border-color: red;
+        .ep-sub {
+            font-size: 0.9rem;
+            font-weight: 700;
+            opacity: 0.6;
         }
 
-        /* ── TV UTILS ── */
-        .focusable {
-            outline: none;
+        /* SEARCH RESULTS */
+        #searchResults {
+            display: none;
+            margin-bottom: 200px;
         }
 
-        /* MOBILE OVERRIDES */
-        @media (max-width: 768px) {
+        #searchResults.active {
+            display: block;
+        }
+
+        .search-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            padding: 40px 60px;
+        }
+
+        /* FOOTER */
+        footer {
+            padding: 100px 60px;
+            border-top: 1px solid var(--border);
+            margin-top: 100px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            opacity: 0.3;
+        }
+
+        .update-info {
+            color: var(--gold);
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 900px) {
             aside {
                 display: none;
             }
 
             .hero {
-                height: 40vh;
-                padding: 20px;
+                height: 50vh;
+                margin: 20px;
+                padding: 30px;
             }
 
             .hero-title {
-                font-size: 2rem;
+                font-size: 3rem;
             }
 
-            .rows-container {
-                padding: 20px;
+            .top-bar {
+                padding: 30px 20px;
+            }
+
+            .row {
+                margin: 40px 20px;
             }
 
             .card {
-                flex: 0 0 160px;
+                flex: 0 0 170px;
             }
 
-            .modal-top {
-                height: 35%;
-            }
-
-            .modal-bottom {
-                height: 65%;
-                flex-direction: column;
-                overflow-y: auto;
-                align-items: stretch;
-            }
-
-            .ep-card {
-                flex: none;
-                height: 50px;
+            .search-container {
                 width: 100%;
             }
         }
@@ -517,92 +616,115 @@
 </head>
 
 <body>
-    <div class="bg-glow"></div>
+    <div id="bgGlow"></div>
 
     <div id="splash">
-        <img src="logo.svg" class="splash-logo" alt="Logo">
-        <div style="font-size: 2.5rem; font-weight: 900; color: var(--gold); margin-top: 10px;">رمضان 2026</div>
-        <div style="font-size: 1.2rem; margin-top: 5px; opacity: 0.6;">Ultra Premium by Karas</div>
-        <div class="loader-dots">
-            <div class="dot"></div>
-            <div class="dot"></div>
-            <div class="dot"></div>
+        <img src="logo.svg" class="splash-logo" alt="Karas">
+        <div style="font-size: 4rem; font-weight: 900; color: var(--gold); margin-top: 20px;">KARAS</div>
+        <div style="font-size: 1.2rem; opacity: 0.5; margin-top: 10px; letter-spacing: 2px;">ULTRA PREMIUM</div>
+        <div
+            style="margin-top: 50px; width: 300px; height: 3px; background: rgba(255,255,255,0.05); border-radius: 10px; overflow: hidden;">
+            <div style="width: 30%; height: 100%; background: var(--gold); animation: load 2s infinite ease-in-out;">
+            </div>
         </div>
     </div>
 
-    <div id="app" style="flex-direction: row;">
-        <aside>
-            <div class="nav-item active focusable" tabindex="0">
+    <div id="app">
+        <aside id="sidebar">
+            <div class="nav-item active focusable" tabindex="0" onclick="location.reload()">
                 <i>🏠</i> <span class="nav-label">الرئيسية</span>
             </div>
-            <div class="nav-item focusable" tabindex="0">
-                <i>📁</i> <span class="nav-label">المسلسلات</span>
+            <div class="nav-item focusable" tabindex="0" onclick="showSection('watchlist')">
+                <i>⭐</i> <span class="nav-label">قائمتي</span>
             </div>
-            <div class="nav-item focusable" tabindex="0">
-                <i>⭐</i> <span class="nav-label">المفضلة</span>
+            <div class="nav-item focusable" tabindex="0" onclick="document.getElementById('searchInput').focus()">
+                <i>🔍</i> <span class="nav-label">البحث</span>
             </div>
             <div style="margin-top: auto;" class="nav-item focusable" tabindex="0">
                 <i>⚙️</i> <span class="nav-label">الإعدادات</span>
             </div>
         </aside>
 
-        <main id="scroller">
-            <section class="hero" id="hero">
-                <div class="hero-bg" id="heroBg"></div>
-                <div class="hero-content">
-                    <h1 class="hero-title" id="heroTitle">...</h1>
-                    <div class="hero-meta">حصرياً على تطبيق Karas Ultra</div>
-                    <div class="hero-btns">
-                        <button class="btn-p btn-play focusable" tabindex="0" id="heroPlay">▶ شاهد الآن</button>
-                        <button class="btn-p btn-more focusable" tabindex="0">ℹ تفاصيل أكثر</button>
-                    </div>
+        <main id="main">
+            <div class="top-bar">
+                <img src="logo.svg" style="height: 60px;" alt="">
+                <div class="search-container">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" id="searchInput" placeholder="ابحث عن مسلسلك..." tabindex="0">
                 </div>
-            </section>
-
-            <div class="rows-container" id="rows">
-                <!-- Rows will be injected here -->
             </div>
 
-            <footer style="padding: 100px 60px; text-align: center; opacity: 0.4;">
-                <p>© 2026 Karas Ultra Premium Experience</p>
-                <p style="font-size: 0.8rem;">نسخة حصرية للأندرويد و TV Box</p>
+            <div id="homeContent">
+                <section class="hero" id="hero">
+                    <div class="hero-bg" id="heroBg"></div>
+                    <div class="hero-content">
+                        <div class="hero-meta"><span class="badge">الأكثر مشاهدة</span> Karas Series 2026</div>
+                        <h1 class="hero-title" id="heroTitle">...</h1>
+                        <div class="hero-btns">
+                            <button class="btn btn-play focusable" tabindex="0" id="heroPlay">▶ المشاهدة الآن</button>
+                            <button class="btn btn-list focusable" tabindex="0" id="heroListBtn">➕ قائمتي</button>
+                        </div>
+                    </div>
+                </section>
+
+                <div id="rows">
+                    <!-- Dynamic Rows -->
+                </div>
+            </div>
+
+            <div id="searchResults" class="row">
+                <div class="row-title">نتائج البحث</div>
+                <div class="search-grid" id="searchGrid"></div>
+            </div>
+
+            <footer>
+                <div class="update-info" id="updateInfo">جاري جلب حالة السحاب...</div>
+                <p>© 2026 Karas Ultra Premium | v2.5.0</p>
+                <div style="display: flex; gap: 20px; margin-top: 10px;">
+                    <span>Android Optimized</span> • <span>Cloud Streaming</span>
+                </div>
             </footer>
         </main>
     </div>
 
     <div id="modal">
-        <div class="modal-top">
-            <button class="close-vid focusable" id="closeVid" tabindex="0">✕ إغلاق</button>
-            <video id="vPlayer" controls playsinline x-webkit-airplay="allow" controlsList="nodownload"></video>
+        <div class="player-top">
+            <div class="player-controls">
+                <button class="player-btn focusable" id="closeVid" tabindex="0">✕ إغلاق</button>
+            </div>
+            <video id="vPlayer" controls playsinline x-webkit-airplay="allow"></video>
             <div id="videoOverlay">
                 <div style="text-align:center">
-                    <div class="dot"
-                        style="display:inline-block; width:40px; height:40px; border:3px solid var(--gold); border-top-color:transparent; border-radius:50%; animation: dotJump 1s linear infinite">
+                    <div
+                        style="width:70px; height:70px; border:5px solid var(--gold); border-top-color:transparent; border-radius:50%; animation: spin 1s linear infinite; display:inline-block">
                     </div>
-                    <p style="margin-top:15px; font-weight:700" id="vStatus">جاري جلب الرابط...</p>
+                    <p style="margin-top:25px; font-weight:900; font-size: 1.5rem;" id="vStatus">جاري استخراج الرابط
+                        السحابي...</p>
                 </div>
             </div>
         </div>
-        <div class="modal-bottom" id="epList">
-            <!-- Episodes -->
-        </div>
+        <div class="player-bottom" id="epList"></div>
     </div>
 
     <script>
         const API = "https://ramadan-v2j0.onrender.com";
-        let allData = [], hls = null;
+        let allData = [], watchlist = [], hls = null, currentEpIdx = 0, currentEps = [];
 
+        // ── INITIALIZATION ──
         async function init() {
+            watchlist = JSON.parse(localStorage.getItem('watchlist') || '[]');
             try {
                 const res = await fetch(`${API}/api/data?v=${Date.now()}`);
                 const data = await res.json();
                 allData = data.series || [];
 
+                if (data.last_updated) {
+                    document.getElementById('updateInfo').textContent = `آخر تحديث للسحابة: ${data.last_updated}`;
+                }
+
                 if (allData.length > 0) {
                     const feat = allData[Math.floor(Math.random() * allData.length)];
-                    document.getElementById('heroBg').style.backgroundImage = `url(${feat.image})`;
-                    document.getElementById('heroTitle').innerHTML = feat.title;
-                    document.getElementById('heroPlay').onclick = () => openSeries(feat.slug);
+                    updateHero(feat);
                 }
 
                 renderRows();
@@ -610,7 +732,7 @@
                 setTimeout(() => {
                     document.getElementById('splash').style.opacity = '0';
                     document.getElementById('app').style.opacity = '1';
-                    setTimeout(() => document.getElementById('splash').remove(), 1000);
+                    setTimeout(() => document.getElementById('splash').remove(), 1500);
                 }, 1500);
             } catch (e) {
                 console.error(e);
@@ -618,69 +740,146 @@
             }
         }
 
-        function renderRows() {
-            const container = document.getElementById('rows');
-            // Group by arbitrary logic for visual rows
-            const sections = [
-                { title: "أحدث الحلقات", data: allData.slice(0, 15) },
-                { title: "الأكثر مشاهدة", data: allData.slice(15, 30) },
-                { title: "مسلسلات رمضان 2026", data: allData.slice(30) }
-            ];
+        function updateHero(s) {
+            document.getElementById('heroBg').style.backgroundImage = `url(${s.image})`;
+            document.getElementById('heroTitle').textContent = s.title;
+            document.getElementById('heroPlay').onclick = () => openSeries(s.slug);
 
-            container.innerHTML = sections.map(sec => `
-                <div class="row">
-                    <div class="row-title">${sec.title}</div>
-                    <div class="row-scroller">
-                        ${sec.data.map(s => `
-                            <div class="card focusable" tabindex="0" onclick="openSeries('${s.slug}')">
-                                <img src="${s.image}" alt="${s.title}" loading="lazy" onerror="this.src='logo.svg'">
-                                <div class="card-overlay">
-                                    <div class="card-name">${s.title}</div>
-                                </div>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-            `).join('');
+            const btn = document.getElementById('heroListBtn');
+            const isFav = watchlist.includes(s.slug);
+            btn.innerHTML = isFav ? "✅ في قائمتي" : "➕ قائمتي";
+            btn.onclick = () => toggleWatchlist(s.slug, btn);
+
+            updateTheme(s.image);
         }
 
+        // ── DYNAMIC THEMING (SURPRISE 2) ──
+        function updateTheme(imgUrl) {
+            // Simulate color extraction based on poster index to give variety
+            const colors = ['#101025', '#251010', '#102515', '#251510', '#181025'];
+            const idx = Math.abs(imgUrl.length % colors.length);
+            document.body.style.setProperty('--bg-glow', colors[idx]);
+        }
+
+        // ── RENDER ROWS ──
+        function renderRows() {
+            const container = document.getElementById('rows');
+            let html = '';
+
+            // WATCHLIST ROW (SURPRISE 1)
+            if (watchlist.length > 0) {
+                const favData = allData.filter(s => watchlist.includes(s.slug));
+                html += `
+                    <div class="row">
+                        <div class="row-header"><div class="row-title">قائمتي <span>للوصول السريع</span></div></div>
+                        <div class="row-scroller">${favData.map(s => renderCard(s)).join('')}</div>
+                    </div>
+                `;
+            }
+
+            const sections = [
+                { title: "أحدث الحلقات", data: allData.slice(0, 10) },
+                { title: "مسلسلات رمضان المميزة", data: allData.slice(10, 25) },
+                { title: "الأرشيف الكامل", data: allData.slice(25) }
+            ];
+
+            html += sections.map(sec => `
+                <div class="row">
+                    <div class="row-header"><div class="row-title">${sec.title}</div></div>
+                    <div class="row-scroller">${sec.data.map(s => renderCard(s)).join('')}</div>
+                </div>
+            `).join('');
+
+            container.innerHTML = html;
+        }
+
+        function renderCard(s) {
+            const isFav = watchlist.includes(s.slug);
+            return `
+                <div class="card focusable" tabindex="0" onclick="openSeries('${s.slug}')">
+                    <img src="${s.image}" onerror="this.src='logo.svg'">
+                    <div class="card-fav ${isFav ? 'active' : ''}">★</div>
+                    <div class="card-overlay">
+                        <div class="card-name">${s.title}</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // ── WATCHLIST LOGIC ──
+        function toggleWatchlist(slug, btn) {
+            const idx = watchlist.indexOf(slug);
+            if (idx > -1) watchlist.splice(idx, 1);
+            else watchlist.push(slug);
+            localStorage.setItem('watchlist', JSON.stringify(watchlist));
+            if (btn) btn.innerHTML = watchlist.includes(slug) ? "✅ في قائمتي" : "➕ قائمتي";
+            renderRows();
+        }
+
+        // ── SEARCH LOGIC ──
+        const searchInput = document.getElementById('searchInput');
+        searchInput.addEventListener('input', (e) => {
+            const q = e.target.value.toLowerCase();
+            if (q.length > 0) {
+                const results = allData.filter(s => s.title.toLowerCase().includes(q));
+                document.getElementById('homeContent').style.display = 'none';
+                document.getElementById('searchResults').classList.add('active');
+                document.getElementById('searchGrid').innerHTML = results.length > 0
+                    ? results.map(s => renderCard(s)).join('')
+                    : '<div style="width:100%; text-align:center; padding:100px; opacity:0.5"><h3>عذراً، لم نجد نتائج لبحثك</h3></div>';
+            } else {
+                hideSearch();
+            }
+        });
+
+        function hideSearch() {
+            document.getElementById('homeContent').style.display = 'block';
+            document.getElementById('searchResults').classList.remove('active');
+            searchInput.value = '';
+        }
+
+        // ── PLAYER & EPISODES ──
         async function openSeries(slug) {
             const series = allData.find(s => s.slug === slug);
+            updateTheme(series.image);
             document.getElementById('modal').classList.add('open');
-            document.getElementById('epList').innerHTML = '<p>جاري تحميل الحلقات...</p>';
-            document.getElementById('videoOverlay').style.opacity = '1';
-            document.getElementById('videoOverlay').style.pointerEvents = 'auto';
+            document.getElementById('epList').innerHTML = '<div style="width:100%; text-align:center">جاري جلب الحلقات...</div>';
 
             try {
                 const res = await fetch(`${API}/api/episodes?slug=${slug}`);
                 const data = await res.json();
-                const eps = data.episodes || [];
+                currentEps = data.episodes || [];
 
-                document.getElementById('epList').innerHTML = eps.map((ep, i) => `
-                    <div class="ep-card focusable" tabindex="0" onclick="playEpisode('${ep.url}')">
-                        الحلقة ${i + 1}
+                document.getElementById('epList').innerHTML = currentEps.map((ep, i) => `
+                    <div class="ep-card focusable" id="ep-${i}" tabindex="0" onclick="playEpisode(${i})">
+                        <div class="ep-num">${i + 1}</div>
+                        <div class="ep-sub">الحلقة</div>
                     </div>
                 `).join('');
 
-                if (eps.length > 0) playEpisode(eps[0].url);
+                if (currentEps.length > 0) playEpisode(0);
             } catch (e) {
-                document.getElementById('epList').innerHTML = '<p>تعذر تحميل الحلقات</p>';
+                document.getElementById('epList').innerHTML = '⚠️ خطأ في تحميل الحلقات';
             }
         }
 
-        async function playEpisode(url) {
+        async function playEpisode(idx) {
+            currentEpIdx = idx;
+            const ep = currentEps[idx];
             const v = document.getElementById('vPlayer');
             const overlay = document.getElementById('videoOverlay');
+
+            // Highlight active episode
+            document.querySelectorAll('.ep-card').forEach(c => c.classList.remove('active'));
+            document.getElementById(`ep-${idx}`)?.classList.add('active');
+            document.getElementById(`ep-${idx}`)?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+
             if (hls) hls.destroy();
             v.pause(); v.src = "";
             overlay.style.display = 'flex';
-            overlay.style.pointerEvents = 'auto';
-
-            // Tap video to toggle play/pause
-            v.onclick = () => v.paused ? v.play() : v.pause();
 
             try {
-                const res = await fetch(`${API}/api/stream?url=${encodeURIComponent(url)}`);
+                const res = await fetch(`${API}/api/stream?url=${encodeURIComponent(ep.url)}`);
                 const data = await res.json();
                 if (data.url) {
                     if (data.url.includes('.m3u8')) {
@@ -691,34 +890,35 @@
                             hls.on(Hls.Events.MANIFEST_PARSED, () => {
                                 v.play();
                                 overlay.style.display = 'none';
-                                overlay.style.pointerEvents = 'none';
                             });
                         } else {
                             v.src = data.url; v.play();
                             overlay.style.display = 'none';
-                            overlay.style.pointerEvents = 'none';
                         }
                     } else {
                         v.src = data.url; v.play();
                         overlay.style.display = 'none';
-                        overlay.style.pointerEvents = 'none';
                     }
                 }
-            } catch (e) { alert("خطأ في التشغيل"); }
+            } catch (e) { alert("⚠️ تعذر تشغيل الحلقة"); }
         }
+
+        // ── AUTO-NEXT (SURPRISE 3) ──
+        document.getElementById('vPlayer').addEventListener('ended', () => {
+            if (currentEpIdx < currentEps.length - 1) {
+                console.log("🎬 Play next episode automatically...");
+                playEpisode(currentEpIdx + 1);
+            }
+        });
 
         document.getElementById('closeVid').onclick = () => {
             document.getElementById('modal').classList.remove('open');
             document.getElementById('vPlayer').pause();
+            if (hls) hls.destroy();
         };
 
-        // ── TV NAVIGATION OVERRIDE ──
+        // FOCUS MANAGEMENT
         window.addEventListener('keydown', (e) => {
-            const active = document.activeElement;
-            if (active.classList.contains('focusable')) {
-                // Focus management is complex in JS, we rely on browser's spatial navigation 
-                // but we can add manual overrides here if needed.
-            }
             if (e.key === 'Escape') document.getElementById('closeVid').click();
         });
 

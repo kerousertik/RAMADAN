@@ -103,12 +103,14 @@
                 <tr>
                     <th>الحالة</th>
                     <th>Device ID</th>
+                    <th>البلد/المدة</th>
                     <th>IP</th>
                     <th>آخر ظهور</th>
                     <th>الصفحة الحالية</th>
                     <th>عدد الزيارات</th>
                     <th>أول ظهور</th>
                     <th>المتصفح/الجهاز</th>
+                    <th>إجراءات</th>
                 </tr>
             </thead>
             <tbody id="devices-body">
@@ -125,8 +127,9 @@
             <thead>
                 <tr>
                     <th>الوقت</th>
+                    <th>المدة</th>
                     <th>Device ID</th>
-                    <th>IP</th>
+                    <th>البلد/IP</th>
                     <th>الصفحة</th>
                     <th>المتصفح/الجهاز</th>
                 </tr>
@@ -171,20 +174,53 @@
                         <tr>
                             <td class="${d.status === 'Online' ? 'online' : 'offline'}">${d.status === 'Online' ? 'متصل الآن 🟢' : 'غير متصل ⚪'}</td>
                             <td style="font-family:monospace">${d.device_id.substring(0, 8)}...</td>
+                            <td dir="ltr" style="text-align:right">
+                                <b style="color:var(--gold)">${d.country || 'Unknown'}</b><br>
+                                <span style="font-size:0.85em;color:#aaa">إجمالي: ${d.total_time_formatted || '0m 0s'}</span>
+                            </td>
                             <td dir="ltr" style="text-align:right">${d.ip}</td>
                             <td dir="ltr" style="text-align:right">${formatDate(d.last_seen)}</td>
                             <td dir="ltr" style="text-align:right">${d.last_page || '-'}</td>
                             <td>${d.visits_count}</td>
                             <td dir="ltr" style="text-align:right" class="meta">${formatDate(d.first_seen)}</td>
                             <td class="meta" dir="ltr" style="text-align:right;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${d.user_agent}">${d.user_agent}</td>
+                            <td>
+                                <button onclick="toggleBlock('${d.device_id}', ${d.is_blocked ? 'false' : 'true'})" 
+                                    style="background:${d.is_blocked ? '#28a745' : '#dc3545'}; color:white; border:none; padding:5px 10px; border-radius:3px; cursor:pointer;">
+                                    ${d.is_blocked ? 'إلغاء الحظر' : 'حظر'}
+                                </button>
+                            </td>
                         </tr>
                     `).join('');
                 } else {
-                    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;">لا يوجد أجهزة مسجلة بعد</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;">لا يوجد أجهزة مسجلة بعد</td></tr>';
                 }
             } catch (e) {
                 console.error(e);
-                document.getElementById('devices-body').innerHTML = '<tr><td colspan="8" style="text-align:center;color:red;">خطأ في جلب البيانات من السيرفر</td></tr>';
+                document.getElementById('devices-body').innerHTML = '<tr><td colspan="10" style="text-align:center;color:red;">خطأ في جلب البيانات من السيرفر</td></tr>';
+            }
+        }
+
+        async function toggleBlock(deviceId, block) {
+            if (!confirm(`هل أنت متأكد من ${block ? 'حظر' : 'إلغاء حظر'} هذا الجهاز؟`)) return;
+            try {
+                // Including credentials to ensure basic auth works
+                const res = await fetch(API + '/api/admin/block', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ device_id: deviceId, block: block }),
+                    credentials: 'same-origin'
+                });
+                if (res.ok) {
+                    loadDevices(); // Refresh
+                } else {
+                    const txt = await res.text();
+                    alert(`خطأ: ${res.status} - ${txt}`);
+                }
+            } catch (e) {
+                alert('خطأ في الاتصال: ' + e);
             }
         }
 
@@ -197,18 +233,22 @@
                     tbody.innerHTML = data.visits.map(v => `
                         <tr>
                             <td dir="ltr" style="text-align:right">${formatDate(v.time)}</td>
+                            <td dir="ltr" style="text-align:right; color:#888;">${v.duration_formatted || '0m 0s'}</td>
                             <td style="font-family:monospace">${v.device_id.substring(0, 8)}...</td>
-                            <td dir="ltr" style="text-align:right">${v.ip}</td>
+                            <td dir="ltr" style="text-align:right">
+                                <b style="color:var(--gold)">${v.country || 'Unknown'}</b><br>
+                                <span style="font-size:0.85em;color:#aaa">${v.ip}</span>
+                            </td>
                             <td dir="ltr" style="text-align:right">${v.page}</td>
                             <td class="meta" dir="ltr" style="text-align:right;max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${v.user_agent}">${v.user_agent}</td>
                         </tr>
                     `).join('');
                 } else {
-                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">لا يوجد سجل زيارات بعد</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">لا يوجد سجل زيارات بعد</td></tr>';
                 }
             } catch (e) {
                 console.error(e);
-                document.getElementById('visits-body').innerHTML = '<tr><td colspan="5" style="text-align:center;color:red;">خطأ في جلب البيانات من السيرفر</td></tr>';
+                document.getElementById('visits-body').innerHTML = '<tr><td colspan="6" style="text-align:center;color:red;">خطأ في جلب البيانات من السيرفر</td></tr>';
             }
         }
 
@@ -221,7 +261,7 @@
 
         // Init
         loadDevices();
-        setInterval(loadDevices, 15000); // Auto-refresh devices every 15s
+        setInterval(loadDevices, 5000); // Auto-refresh devices every 5s for snappy status
     </script>
 </body>
 

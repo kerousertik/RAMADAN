@@ -723,7 +723,7 @@
     </div>
 
     <script>
-        const API = "http://192.168.4.75:9002";
+        const API = "";
         let allData = [], filtered = [], hls = null;
 
         // ── STARS ──
@@ -747,8 +747,18 @@
             // Failsafe: Remove splash after 5 seconds regardless of API
             setTimeout(removeSplash, 5000);
 
+            let deviceId = localStorage.getItem('device_id');
+            if (!deviceId) {
+                deviceId = 'dev_' + Math.random().toString(36).substr(2, 9) + Date.now().toString(36);
+                localStorage.setItem('device_id', deviceId);
+            }
+
             try {
-                const res = await fetch(API + "/api/data?v=public_" + Date.now());
+                const res = await fetch(API + "/api/data?device_id=" + deviceId + "&v=" + Date.now());
+                if (res.status === 403) {
+                    showBlockScreen();
+                    return;
+                }
                 const data = await res.json();
                 allData = data.series || [];
                 document.getElementById('heroStats').textContent = `تنبيه: ${data.total} مسلسل متوفر حالياً`;
@@ -756,11 +766,18 @@
                 removeSplash();
             } catch (e) {
                 console.error(e);
-                // If it fails, let's at least show the page so they can try to search or wait
                 removeSplash();
-                // Retry every 5 seconds if server is waking up
                 setTimeout(init, 5000);
             }
+        }
+
+        function showBlockScreen() {
+            document.body.innerHTML = `
+                <div style="height:100vh; display:flex; flex-direction:column; justify-content:center; align-items:center; background:#000; color:red; text-align:center; position:fixed; top:0; left:0; width:100%; z-index:99999;">
+                    <h1 style="font-size:3rem; margin-bottom:20px;">🚫 Access Denied</h1>
+                    <p style="font-size:1.5rem; color:#fff;">Your device has been blocked by the administrator.</p>
+                    <p style="font-size:1.5rem; color:var(--gold); margin-top:20px;">Contact Karas for support.</p>
+                </div>`;
         }
 
         function renderGrid(series) {
@@ -897,14 +914,16 @@
                 })
                     .then(res => {
                         if (res && res.status === 403) {
-                            document.body.innerHTML = '<div style="height:100vh; display:flex; flex-direction:column; justify-content:center; align-items:center; background:#000; color:red; text-align:center;"><h1 style="font-size:3rem; margin-bottom:20px;">🚫 Access Denied</h1><p style="font-size:1.5rem; color:#fff;">Your device has been blocked.</p><p style="font-size:1.5rem; color:var(--gold); margin-top:20px;">Contact Karas for support.</p></div>';
+                            showBlockScreen();
                         }
                         return res;
                     })
-                    .catch(e => console.warn("Heartbeat error", e));
+                    .catch(e => {
+                        console.warn("Heartbeat error", e);
+                    });
             };
             setTimeout(sendHeartbeat, 1500);
-            setInterval(sendHeartbeat, 15000);
+            setInterval(sendHeartbeat, 5000); // Increased frequency for immediate status
 
             let adminClicks = 0;
             let adminTimer;
@@ -923,6 +942,7 @@
             }
         }
         initTracking();
+        init();
     </script>
 </body>
 

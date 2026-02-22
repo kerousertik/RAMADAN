@@ -34,7 +34,10 @@ def init_db():
         first_seen DATETIME,
         last_seen DATETIME,
         last_page TEXT,
-        visits_count INTEGER
+        visits_count INTEGER,
+        is_blocked INTEGER DEFAULT 0,
+        country TEXT DEFAULT 'Unknown',
+        total_time_seconds INTEGER DEFAULT 0
     )''')
     c.execute('''CREATE TABLE IF NOT EXISTS visits_log (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -43,12 +46,25 @@ def init_db():
         name TEXT,
         user_agent TEXT,
         page TEXT,
-        time DATETIME
+        time DATETIME,
+        duration_seconds INTEGER DEFAULT 0
     )''')
     conn.commit()
     conn.close()
 
 init_db()
+
+# Add new columns to existing dbs if needed
+try:
+    conn = sqlite3.connect(DB_FILE)
+    conn.execute("ALTER TABLE visitors ADD COLUMN is_blocked INTEGER DEFAULT 0")
+    conn.execute("ALTER TABLE visitors ADD COLUMN country TEXT DEFAULT 'Unknown'")
+    conn.execute("ALTER TABLE visitors ADD COLUMN total_time_seconds INTEGER DEFAULT 0")
+    conn.execute("ALTER TABLE visits_log ADD COLUMN duration_seconds INTEGER DEFAULT 0")
+    conn.commit()
+    conn.close()
+except:
+    pass
 
 SENDER_EMAIL = os.environ.get("SENDER_EMAIL", "komonashat222@gmail.com")
 SENDER_PASSWORD = os.environ.get("SENDER_PASSWORD", "srckjctweknkuuwk")
@@ -78,6 +94,17 @@ def get_client_ip(headers, client_address):
     if x_forwarded_for:
         return x_forwarded_for.split(',')[0].strip()
     return client_address[0]
+
+def get_country_from_ip(ip):
+    if ip in ['127.0.0.1', '::1', 'localhost'] or ip.startswith('192.168.'):
+        return 'Local Network'
+    try:
+        req = requests.get(f'http://ip-api.com/json/{ip}?fields=country', timeout=2)
+        if req.status_code == 200:
+            return req.json().get('country', 'Unknown')
+    except:
+        pass
+    return 'Unknown'
 
 
 BASE = "https://a.alooytv7.xyz"
@@ -330,14 +357,23 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         self.wfile.write(b'Unauthorized Access')
         return True
 
-    def do_OPTIONS(self):
-        self.send_response(200)
-        self._cors()
-        self.end_headers()
 
     def do_GET(self):
         parsed = urllib.parse.urlparse(self.path)
         params = urllib.parse.parse_qs(parsed.query)
+
+        if parsed.path == "/" or parsed.path == "/index.html":
+            index_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "public", "index.html")
+            try:
+                with open(index_path, "r", encoding="utf-8") as f:
+                    html = f.read()
+                self.send_response(200)
+                self.send_header("Content-Type", "text/html; charset=utf-8")
+                self.end_headers()
+                self.wfile.write(html.encode("utf-8"))
+            except Exception as e:
+                self._json(500, {"error": str(e)})
+            return
 
         if parsed.path == "/admin":
             if self.require_auth(): return
@@ -354,6 +390,16 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             return
 
         if parsed.path == "/api/data":
+            device_id = (params.get("device_id") or [""])[0]
+            if device_id:
+                conn = sqlite3.connect(DB_FILE)
+                c = conn.cursor()
+                c.execute("SELECT is_blocked FROM visitors WHERE device_id = ?", (device_id,))
+                row = c.fetchone()
+                conn.close()
+                if row and row[0] == 1:
+                    return self._json(403, {"error": "blocked"})
+
             body = json.dumps(_cache, ensure_ascii=False).encode("utf-8")
             self.send_response(200)
             self._cors()
@@ -395,9 +441,14 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                 for r in rows:
                     try:
                         last = datetime.fromisoformat(r['last_seen'])
-                        r['status'] = 'Online' if (now - last).total_seconds() <= 30 else 'Offline'
+                        diff = (now - last).total_seconds()
+                        r['status'] = 'Online' if diff <= 15 else 'Offline'
                     except:
                         r['status'] = 'Unknown'
+                    
+                    # Add formatted time
+                    secs = r.get('total_time_seconds', 0) or 0
+                    r['total_time_formatted'] = f"{secs // 60}m {secs % 60}s"
                 self._json(200, {"devices": rows})
             except Exception as e:
                 self._json(500, {"error": str(e)})
@@ -408,9 +459,18 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                 conn = sqlite3.connect(DB_FILE)
                 conn.row_factory = sqlite3.Row
                 c = conn.cursor()
-                c.execute("SELECT * FROM visits_log ORDER BY id DESC LIMIT 200")
+                # Join with visitors to get country for the visit log
+                c.execute('''
+                    SELECT l.*, v.country 
+                    FROM visits_log l
+                    LEFT JOIN visitors v ON l.device_id = v.device_id
+                    ORDER BY l.id DESC LIMIT 200
+                ''')
                 rows = [dict(r) for r in c.fetchall()]
                 conn.close()
+                for r in rows:
+                    ds = r.get('duration_seconds', 0) or 0
+                    r['duration_formatted'] = f"{ds // 60}m {ds % 60}s"
                 self._json(200, {"visits": rows})
             except Exception as e:
                 self._json(500, {"error": str(e)})
@@ -418,9 +478,16 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         else:
             super().do_GET()
 
+    def do_OPTIONS(self):
+        self.send_response(200)
+        self._cors()
+        self.end_headers()
+
     def do_POST(self):
         parsed = urllib.parse.urlparse(self.path)
-        if parsed.path == "/api/heartbeat":
+        path = parsed.path.rstrip("/")
+        
+        if path == "/api/heartbeat":
             try:
                 content_length = int(self.headers.get('Content-Length', 0))
                 post_data = self.rfile.read(content_length)
@@ -436,41 +503,85 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                 conn = sqlite3.connect(DB_FILE)
                 c = conn.cursor()
                 
-                c.execute("SELECT first_seen, last_seen, visits_count FROM visitors WHERE device_id = ?", (device_id,))
+                c.execute("SELECT first_seen, last_seen, visits_count, is_blocked, country, total_time_seconds FROM visitors WHERE device_id = ?", (device_id,))
                 row = c.fetchone()
                 
+                if row and row[3] == 1: # user is blocked
+                    conn.close()
+                    return self._json(403, {"error": "blocked"})
+                
                 if not row:
+                    country = get_country_from_ip(ip)
                     # New device
-                    c.execute('''INSERT INTO visitors (device_id, ip, name, user_agent, first_seen, last_seen, last_page, visits_count)
-                                 VALUES (?, ?, ?, ?, ?, ?, ?, 1)''', 
-                              (device_id, ip, name, user_agent, now_iso, now_iso, page))
-                    notify_async("🚨 جهاز جديد دخل الموقع", f"وقت الدخول: {now_iso}\nIP: {ip}\nDevice ID: {device_id}\nالصفحة: {page}\nالمتصفح: {user_agent}")
+                    c.execute('''INSERT INTO visitors (device_id, ip, name, user_agent, first_seen, last_seen, last_page, visits_count, country, total_time_seconds)
+                                 VALUES (?, ?, ?, ?, ?, ?, ?, 1, ?, 0)''', 
+                              (device_id, ip, name, user_agent, now_iso, now_iso, page, country))
+                    notify_async("🚨 جهاز جديد دخل الموقع", f"وقت الدخول: {now_iso}\nIP: {ip}\nالبلد: {country}\nDevice ID: {device_id}\nالصفحة: {page}\nالمتصفح: {user_agent}")
+                    
+                    c.execute('''INSERT INTO visits_log (device_id, ip, name, user_agent, page, time, duration_seconds)
+                             VALUES (?, ?, ?, ?, ?, ?, 0)''', (device_id, ip, name, user_agent, page, now_iso))
                 else:
-                    first_seen, last_seen, visits_count = row
+                    first_seen, last_seen_iso, visits_count, is_blocked, country, total_time_seconds = row
+                    if total_time_seconds is None: total_time_seconds = 0
+                    
+                    if country == 'Unknown' or not country:
+                        country = get_country_from_ip(ip)
+
                     try:
-                        last_seen_dt = datetime.fromisoformat(last_seen)
+                        last_seen_dt = datetime.fromisoformat(last_seen_iso)
                     except Exception:
                         last_seen_dt = now
                         
                     time_diff = (now - last_seen_dt).total_seconds()
                     visits_count_new = visits_count
                     
-                    if time_diff > 30 * 60: # 30 minutes
-                        notify_async("🔙 جهاز رجع للموقع", f"وقت الدخول: {now_iso}\nIP: {ip}\nDevice ID: {device_id}\nالصفحة: {page}\nالمتصفح: {user_agent}\nمدة الغياب: {int(time_diff/60)} دقيقة")
+                    # Update duration for the last visit log
+                    if 0 < time_diff < 30 * 60: # still in the same session
+                        # Increase duration_seconds in visits_log, ensuring it starts from 0 if NULL
+                        c.execute('''
+                            UPDATE visits_log 
+                            SET duration_seconds = COALESCE(duration_seconds, 0) + ? 
+                            WHERE id = (SELECT id FROM visits_log WHERE device_id = ? ORDER BY id DESC LIMIT 1)
+                        ''', (int(time_diff), device_id))
+                        total_time_seconds += int(time_diff)
+                    
+                    if time_diff > 30 * 60: # 30 minutes offline means new visit
+                        notify_async("🔙 جهاز رجع للموقع", f"وقت الدخول: {now_iso}\nIP: {ip}\nالبلد: {country}\nDevice ID: {device_id}\nالصفحة: {page}\nالمتصفح: {user_agent}\nمدة الغياب: {int(time_diff/60)} دقيقة")
                         visits_count_new += 1
+                        c.execute('''INSERT INTO visits_log (device_id, ip, name, user_agent, page, time, duration_seconds)
+                             VALUES (?, ?, ?, ?, ?, ?, 0)''', (device_id, ip, name, user_agent, page, now_iso))
                         
-                    c.execute('''UPDATE visitors SET last_seen = ?, last_page = ?, ip = ?, user_agent = ?, visits_count = ? WHERE device_id = ?''',
-                              (now_iso, page, ip, user_agent, visits_count_new, device_id))
-                              
-                c.execute('''INSERT INTO visits_log (device_id, ip, name, user_agent, page, time)
-                             VALUES (?, ?, ?, ?, ?, ?)''', (device_id, ip, name, user_agent, page, now_iso))
+                    c.execute('''UPDATE visitors SET last_seen = ?, last_page = ?, ip = ?, user_agent = ?, visits_count = ?, country = ?, total_time_seconds = ? WHERE device_id = ?''',
+                              (now_iso, page, ip, user_agent, visits_count_new, country, total_time_seconds, device_id))
                              
                 conn.commit()
                 conn.close()
                 self._json(200, {"status": "ok"})
             except Exception as e:
+                import traceback
+                traceback.print_exc()
                 print(f"Error in heartbeat: {e}", flush=True)
                 self._json(500, {"error": str(e)})
+        elif path == "/api/admin/block":
+            if self.require_auth(): return
+            try:
+                content_length = int(self.headers.get('Content-Length', 0))
+                data = json.loads(self.rfile.read(content_length).decode('utf-8'))
+                device_id = data.get('device_id')
+                block = data.get('block', True)
+                
+                if not device_id:
+                    return self._json(400, {"error": "Missing device_id"})
+                    
+                conn = sqlite3.connect(DB_FILE)
+                c = conn.cursor()
+                c.execute("UPDATE visitors SET is_blocked = ? WHERE device_id = ?", (1 if block else 0, device_id))
+                conn.commit()
+                conn.close()
+                self._json(200, {"status": "ok"})
+            except Exception as e:
+                self._json(500, {"error": str(e)})
+
         else:
             self.send_response(404)
             self._cors()
@@ -479,7 +590,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
     def _cors(self):
         self.send_header("Access-Control-Allow-Origin", "*")
         self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-        self.send_header("Access-Control-Allow-Headers", "*")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type, Authorization")
 
     def _json(self, code, data):
         body = json.dumps(data, ensure_ascii=False).encode("utf-8")
@@ -516,7 +627,7 @@ if __name__ == "__main__":
     resolve_base()
     scrape_all()
     threading.Thread(target=auto_update, args=(30,), daemon=True).start()
-    with ReusableTCPServer(("", PORT), Handler) as httpd:
+    with ReusableTCPServer(("0.0.0.0", PORT), Handler) as httpd:
         print(f"\n🚀 http://localhost:{PORT}\n", flush=True)
         try:
             httpd.serve_forever()
