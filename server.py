@@ -69,6 +69,7 @@ except:
 SENDER_EMAIL = os.environ.get("SENDER_EMAIL", "komonashat222@gmail.com")
 SENDER_PASSWORD = os.environ.get("SENDER_PASSWORD", "srckjctweknkuuwk")
 RECEIVER_EMAIL = SENDER_EMAIL
+DISCORD_WEBHOOK = os.environ.get("DISCORD_WEBHOOK", "") # Highly recommended for Render
 
 # Timezone Adjustment (Render is UTC, Tennessee is UTC-6)
 TIME_OFFSET = int(os.environ.get("TIME_OFFSET", -6))
@@ -77,23 +78,51 @@ def get_now():
     return dt.datetime.now(dt.timezone.utc) + dt.timedelta(hours=TIME_OFFSET)
 
 def send_notification_email(subject, body):
-    try:
-        msg = MIMEMultipart()
-        msg['From'] = SENDER_EMAIL
-        msg['To'] = RECEIVER_EMAIL
-        msg['Subject'] = subject
-        msg.attach(MIMEText(body, 'plain', 'utf-8'))
-        # Try port 2525 as a fallback for Render blocks
-        server = smtplib.SMTP('smtp.gmail.com', 2525)
-        server.starttls()
-        server.login(SENDER_EMAIL, SENDER_PASSWORD)
-        server.send_message(msg)
-        server.quit()
-        print(f"📧 Email sent: {subject}", flush=True)
-    except Exception as e:
-        print(f"❌ Email error: {e}", flush=True)
+    # List of ports to try: (port, use_ssl, use_starttls)
+    attempts = [
+        (465, True, False),  # SSL/TLS (Standard port for many cloud providers)
+        (587, False, True),  # STARTTLS
+    ]
+    
+    last_error = None
+    for port, use_ssl, use_starttls in attempts:
+        try:
+            msg = MIMEMultipart()
+            msg['From'] = SENDER_EMAIL
+            msg['To'] = RECEIVER_EMAIL
+            msg['Subject'] = subject
+            msg.attach(MIMEText(body, 'plain', 'utf-8'))
+            
+            if use_ssl:
+                server = smtplib.SMTP_SSL('smtp.gmail.com', port, timeout=10)
+            else:
+                server = smtplib.SMTP('smtp.gmail.com', port, timeout=10)
+                if use_starttls:
+                    server.starttls()
+            
+            server.login(SENDER_EMAIL, SENDER_PASSWORD)
+            server.send_message(msg)
+            server.quit()
+            print(f"📧 Email sent via port {port}: {subject}", flush=True)
+            return # Success!
+        except Exception as e:
+            last_error = e
+            print(f"⚠️ Port {port} failed: {e}", flush=True)
+            continue
+            
+    print(f"❌ All ports failed. Last error: {last_error}", flush=True)
 
 def notify_async(subject, body):
+    # Try Discord if configured (100% reliable on Render)
+    if DISCORD_WEBHOOK:
+        def discord_msg():
+            try:
+                requests.post(DISCORD_WEBHOOK, json={"content": f"**{subject}**\n{body}"}, timeout=5)
+            except:
+                pass
+        threading.Thread(target=discord_msg).start()
+    
+    # Still try Email via fallback list
     threading.Thread(target=send_notification_email, args=(subject, body), daemon=True).start()
 
 def get_client_ip(headers, client_address):
