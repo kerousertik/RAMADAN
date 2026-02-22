@@ -8,6 +8,14 @@ import os, json, time, threading, datetime as dt
 import sqlite3
 import smtplib
 import base64
+import http.server
+import urllib.parse
+import socketserver
+import requests
+import re
+import random
+from bs4 import BeautifulSoup
+from urllib.parse import urljoin
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 

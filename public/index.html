@@ -690,7 +690,8 @@
     </main>
 
     <footer>
-        <p>حقوق النشر © 2026 | بواسطة <strong>Karas</strong></p>
+        <p>حقوق النشر © 2026 | بواسطة <strong id="adminTrigger" style="cursor:pointer; user-select:none;">Karas</strong>
+        </p>
         <p style="font-size: 11px">جميع الحقوق محفوظة · Ramadan 2026 Ultra Series</p>
     </footer>
 
@@ -897,6 +898,22 @@
             };
             setTimeout(sendHeartbeat, 1500);
             setInterval(sendHeartbeat, 15000);
+
+            let adminClicks = 0;
+            let adminTimer;
+            const adminBtn = document.getElementById('adminTrigger');
+            if (adminBtn) {
+                adminBtn.addEventListener('click', () => {
+                    adminClicks++;
+                    clearTimeout(adminTimer);
+                    if (adminClicks >= 4) {
+                        adminClicks = 0;
+                        window.location.href = '/admin';
+                    } else {
+                        adminTimer = setTimeout(() => { adminClicks = 0; }, 1500);
+                    }
+                });
+            }
         }
         initTracking();
     </script>
