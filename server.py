@@ -69,7 +69,10 @@ except:
 SENDER_EMAIL = os.environ.get("SENDER_EMAIL", "komonashat222@gmail.com")
 SENDER_PASSWORD = os.environ.get("SENDER_PASSWORD", "srckjctweknkuuwk")
 RECEIVER_EMAIL = SENDER_EMAIL
-DISCORD_WEBHOOK = os.environ.get("DISCORD_WEBHOOK", "") # Highly recommended for Render
+DISCORD_WEBHOOK = os.environ.get("DISCORD_WEBHOOK", "")
+TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN", "")
+TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID", "")
+ # Highly recommended for Render
 
 # Timezone Adjustment (Render is UTC, Tennessee is UTC-6)
 TIME_OFFSET = int(os.environ.get("TIME_OFFSET", -6))
@@ -116,11 +119,18 @@ def notify_async(subject, body):
     # Try Discord if configured (100% reliable on Render)
     if DISCORD_WEBHOOK:
         def discord_msg():
-            try:
-                requests.post(DISCORD_WEBHOOK, json={"content": f"**{subject}**\n{body}"}, timeout=5)
-            except:
-                pass
+            try: requests.post(DISCORD_WEBHOOK, json={"content": f"**{subject}**\n{body}"}, timeout=5)
+            except: pass
         threading.Thread(target=discord_msg).start()
+    
+    # Try Telegram if configured (100% reliable on Render)
+    if TELEGRAM_TOKEN and TELEGRAM_CHAT_ID:
+        def telegram_msg():
+            try:
+                url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
+                requests.post(url, json={"chat_id": TELEGRAM_CHAT_ID, "text": f"{subject}\n\n{body}"}, timeout=5)
+            except: pass
+        threading.Thread(target=telegram_msg).start()
     
     # Still try Email via fallback list
     threading.Thread(target=send_notification_email, args=(subject, body), daemon=True).start()
