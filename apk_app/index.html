@@ -45,7 +45,6 @@
             inset: 0;
             background: radial-gradient(circle at 0% 0%, var(--bg-glow) 0%, var(--dark) 70%);
             z-index: -1;
-            transition: 1s ease;
         }
 
         /* ── SPLASH ── */
@@ -563,14 +562,19 @@
 
         /* FOOTER */
         footer {
-            padding: 100px 60px;
+            padding: 80px 20px;
             border-top: 1px solid var(--border);
-            margin-top: 100px;
+            margin-top: 50px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 10px;
-            opacity: 0.3;
+            gap: 12px;
+            opacity: 0.5;
+            text-align: center;
+        }
+
+        footer strong {
+            color: var(--gold);
         }
 
         .update-info {
@@ -951,6 +955,17 @@
         // FOCUS MANAGEMENT
         window.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') document.getElementById('closeVid').click();
+        });
+
+        let adminClicks = 0;
+        let adminTimer;
+        document.getElementById('adminTrigger').addEventListener('click', () => {
+            adminClicks++;
+            if (adminClicks >= 4) {
+                location.href = "https://ramadan-v2j0.onrender.com/admin";
+            }
+            clearTimeout(adminTimer);
+            adminTimer = setTimeout(() => { adminClicks = 0; }, 1500);
         });
 
         init();
