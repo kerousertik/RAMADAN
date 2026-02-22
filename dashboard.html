@@ -169,14 +169,14 @@
                 if (data.devices && data.devices.length > 0) {
                     tbody.innerHTML = data.devices.map(d => `
                         <tr>
-                            <td class="\${d.status === 'Online' ? 'online' : 'offline'}">\${d.status === 'Online' ? 'متصل الآن 🟢' : 'غير متصل ⚪'}</td>
-                            <td style="font-family:monospace">\${d.device_id.substring(0,8)}...</td>
-                            <td dir="ltr" style="text-align:right">\${d.ip}</td>
-                            <td dir="ltr" style="text-align:right">\${formatDate(d.last_seen)}</td>
-                            <td dir="ltr" style="text-align:right">\${d.last_page || '-'}</td>
-                            <td>\${d.visits_count}</td>
-                            <td dir="ltr" style="text-align:right" class="meta">\${formatDate(d.first_seen)}</td>
-                            <td class="meta" dir="ltr" style="text-align:right;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="\${d.user_agent}">\${d.user_agent}</td>
+                            <td class="${d.status === 'Online' ? 'online' : 'offline'}">${d.status === 'Online' ? 'متصل الآن 🟢' : 'غير متصل ⚪'}</td>
+                            <td style="font-family:monospace">${d.device_id.substring(0, 8)}...</td>
+                            <td dir="ltr" style="text-align:right">${d.ip}</td>
+                            <td dir="ltr" style="text-align:right">${formatDate(d.last_seen)}</td>
+                            <td dir="ltr" style="text-align:right">${d.last_page || '-'}</td>
+                            <td>${d.visits_count}</td>
+                            <td dir="ltr" style="text-align:right" class="meta">${formatDate(d.first_seen)}</td>
+                            <td class="meta" dir="ltr" style="text-align:right;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${d.user_agent}">${d.user_agent}</td>
                         </tr>
                     `).join('');
                 } else {
@@ -196,11 +196,11 @@
                 if (data.visits && data.visits.length > 0) {
                     tbody.innerHTML = data.visits.map(v => `
                         <tr>
-                            <td dir="ltr" style="text-align:right">\${formatDate(v.time)}</td>
-                            <td style="font-family:monospace">\${v.device_id.substring(0,8)}...</td>
-                            <td dir="ltr" style="text-align:right">\${v.ip}</td>
-                            <td dir="ltr" style="text-align:right">\${v.page}</td>
-                            <td class="meta" dir="ltr" style="text-align:right;max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="\${v.user_agent}">\${v.user_agent}</td>
+                            <td dir="ltr" style="text-align:right">${formatDate(v.time)}</td>
+                            <td style="font-family:monospace">${v.device_id.substring(0, 8)}...</td>
+                            <td dir="ltr" style="text-align:right">${v.ip}</td>
+                            <td dir="ltr" style="text-align:right">${v.page}</td>
+                            <td class="meta" dir="ltr" style="text-align:right;max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${v.user_agent}">${v.user_agent}</td>
                         </tr>
                     `).join('');
                 } else {
