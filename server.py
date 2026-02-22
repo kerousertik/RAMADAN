@@ -70,6 +70,12 @@ SENDER_EMAIL = os.environ.get("SENDER_EMAIL", "komonashat222@gmail.com")
 SENDER_PASSWORD = os.environ.get("SENDER_PASSWORD", "srckjctweknkuuwk")
 RECEIVER_EMAIL = SENDER_EMAIL
 
+# Timezone Adjustment (Render is UTC, Tennessee is UTC-6)
+TIME_OFFSET = int(os.environ.get("TIME_OFFSET", -6))
+
+def get_now():
+    return dt.datetime.now(dt.timezone.utc) + dt.timedelta(hours=TIME_OFFSET)
+
 def send_notification_email(subject, body):
     try:
         msg = MIMEMultipart()
@@ -438,7 +444,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                 c.execute("SELECT * FROM visitors ORDER BY last_seen DESC")
                 rows = [dict(r) for r in c.fetchall()]
                 conn.close()
-                now = datetime.now()
+                now = get_now()
                 for r in rows:
                     try:
                         last = datetime.fromisoformat(r['last_seen'])
@@ -498,7 +504,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                 user_agent = data.get('userAgent', '')
                 page = data.get('page', '')
                 ip = get_client_ip(self.headers, self.client_address)
-                now = datetime.now()
+                now = get_now()
                 now_iso = now.isoformat()
                 
                 conn = sqlite3.connect(DB_FILE)
