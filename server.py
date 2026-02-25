@@ -160,7 +160,7 @@ def get_country_from_ip(ip):
     return 'Unknown'
 
 
-BASE = "https://a.alooytv7.xyz"
+BASE = "https://a.alooytv8.xyz"
 PORT = int(os.environ.get("PORT", 9002))
 DATA_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data.json")
 
@@ -171,7 +171,7 @@ HEADERS = {"User-Agent": UA, "Accept-Encoding": "identity", "Referer": BASE}
 GATEWAYS = [
     "https://fitnur.com/alooytv",
     "https://alooytv.com",
-    "https://bx.alooytv6.xyz"
+    "https://bx.alooytv8.xyz"
 ]
 
 KNOWN_SERIES = [
@@ -240,6 +240,10 @@ KNOWN_SERIES = [
 # In-memory cache
 _cache = {"series": [], "last_updated": ""}
 
+# Video URL cache (episode_url -> {url, ts})  — avoids re-scraping the same episode
+_video_cache = {}
+_VIDEO_CACHE_TTL = 1800  # 30 minutes
+
 # ─── Self-Healing Domain Resolver ─────────────────────────────────────────────
 
 def resolve_base():
@@ -276,9 +280,12 @@ def resolve_base():
 # ─── Fetch ────────────────────────────────────────────────────────────────────
 
 def fetch(url, retries=2, auto_resolve=True):
+    # Always use identity encoding to prevent hanging on brotli/gzip
+    hdrs = dict(HEADERS)
+    hdrs["Accept-Encoding"] = "identity"
     for i in range(retries):
         try:
-            r = requests.get(url, headers=HEADERS, timeout=12)
+            r = requests.get(url, headers=hdrs, timeout=10)
             if r.status_code == 200:
                 return r.text
             if r.status_code == 404 and auto_resolve:
@@ -474,12 +481,49 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             if not ep_url:
                 return self._json(400, {"error": "no url"})
             print(f"  🎬 Stream: {ep_url[-60:]}", flush=True)
+            # Check cache first
+            cached = _video_cache.get(ep_url)
+            if cached and (time.time() - cached["ts"]) < _VIDEO_CACHE_TTL:
+                print(f"     ⚡ cached: {cached['url'][:80]}", flush=True)
+                return self._json(200, {"url": cached["url"]})
             video_url = get_video_url(ep_url)
             if video_url:
+                _video_cache[ep_url] = {"url": video_url, "ts": time.time()}
                 print(f"     ✅ {video_url[:80]}", flush=True)
                 self._json(200, {"url": video_url})
             else:
                 self._json(500, {"error": "video not found"})
+
+        elif parsed.path == "/api/proxy":
+            # Proxy video stream with correct headers (CDN has no CORS/Content-Type)
+            video_url = urllib.parse.unquote((params.get("url") or [""])[0])
+            if not video_url or not (".mp4" in video_url or ".m3u8" in video_url):
+                return self._json(400, {"error": "invalid url"})
+            try:
+                req_headers = {"User-Agent": UA, "Accept-Encoding": "identity"}
+                range_header = self.headers.get("Range")
+                if range_header:
+                    req_headers["Range"] = range_header
+                r = requests.get(video_url, headers=req_headers, stream=True, timeout=15)
+                status = 206 if range_header and r.status_code == 206 else 200
+                self.send_response(status)
+                self._cors()
+                self.send_header("Content-Type", "video/mp4")
+                if r.headers.get("Content-Length"):
+                    self.send_header("Content-Length", r.headers["Content-Length"])
+                if r.headers.get("Content-Range"):
+                    self.send_header("Content-Range", r.headers["Content-Range"])
+                self.send_header("Accept-Ranges", "bytes")
+                self.end_headers()
+                for chunk in r.iter_content(chunk_size=256 * 1024):
+                    if chunk:
+                        self.wfile.write(chunk)
+            except Exception as e:
+                print(f"  ❌ Proxy error: {e}", flush=True)
+                try:
+                    self._json(502, {"error": str(e)})
+                except Exception:
+                    pass
 
         elif parsed.path == "/api/dashboard/devices":
             if self.require_auth(): return
@@ -674,8 +718,9 @@ def auto_update(mins=30):
         print(f"⏰ Next in {mins} min", flush=True)
 
 
-class ReusableTCPServer(socketserver.TCPServer):
+class ReusableTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
     allow_reuse_address = True
+    daemon_threads = True
 
 
 if __name__ == "__main__":
